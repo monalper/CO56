@@ -42,7 +42,7 @@ const Sidebar = () => {
             {/* Navigation */}
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', flex: 1 }}>
                 <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
-                    <Home size={26} strokeWidth={isActive('/') ? 3 : 2} />
+                    <Home size={26} fill={isActive('/') ? 'currentColor' : 'none'} />
                     <span>Anasayfa</span>
                 </Link>
 

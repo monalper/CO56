@@ -97,7 +97,7 @@ textarea {
 }
 
 .nav-item.active {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .nav-item span {
@@ -352,4 +352,14 @@ textarea {
   .bottom-nav {
     display: none;
   }
+}
+
+::selection {
+  background-color: #1D9BF0;
+  color: #fff
+}
+
+::-moz-selection {
+  background-color: #1D9BF0;
+  color: #fff
 }

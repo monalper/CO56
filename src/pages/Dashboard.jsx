@@ -6,6 +6,7 @@ import PostCard from '../components/PostCard';
 
 const Dashboard = () => {
     const [content, setContent] = useState('');
+    const [location, setLocation] = useState('');
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [myPosts, setMyPosts] = useState([]);
@@ -132,9 +133,8 @@ const Dashboard = () => {
     const onEditPost = (post) => {
         setEditingPostId(post.id);
         setContent(post.content || '');
-        setFiles([]); // Reset files, unfortunately editing existing images is complex, so we might just allow adding new ones or not touch images for now. 
-        // For simplicity in this iteration: Editing only updates text content.
-        // Or we can warn user that images will be kept.
+        setLocation(post.location || '');
+        setFiles([]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -170,6 +170,7 @@ const Dashboard = () => {
     const cancelEdit = () => {
         setEditingPostId(null);
         setContent('');
+        setLocation('');
         setFiles([]);
     };
 
@@ -188,7 +189,7 @@ const Dashboard = () => {
                 // --- UPDATE EXISTING POST ---
                 const { error: updateError } = await supabase
                     .from('posts')
-                    .update({ content: content })
+                    .update({ content: content, location: location || null })
                     .eq('id', editingPostId);
 
                 if (updateError) throw updateError;
@@ -232,7 +233,8 @@ const Dashboard = () => {
                     .from('posts')
                     .insert({
                         user_id: user.id,
-                        content: content
+                        content: content,
+                        location: location || null
                     })
                     .select()
                     .single();
@@ -276,6 +278,7 @@ const Dashboard = () => {
 
             // Reset form
             setContent('');
+            setLocation('');
             setFiles([]);
             fetchData(); // Refresh list
 
@@ -357,6 +360,16 @@ const Dashboard = () => {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         style={{ minHeight: '100px', resize: 'vertical', background: 'transparent', padding: '0' }}
+                    />
+
+                    {/* Location Input */}
+                    <input
+                        type="text"
+                        className="input-field"
+                        placeholder="Konum (opsiyonel)"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        style={{ marginTop: '0.5rem', fontSize: '0.9rem', padding: '0.5rem 0' }}
                     />
 
                     {/* Image Previews */}

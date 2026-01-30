@@ -4,10 +4,13 @@ import { LinkifiedText } from './LinkifiedText';
 import { Trash2, Edit, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PostCard = ({ post, onDelete, onEdit }) => {
-    const { content, profiles, post_images, created_at } = post;
+    const { content, profiles, post_images, created_at, location } = post;
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const textRef = useRef(null);
+
+    // Dynamic Aspect Ratio State
+    const [aspectRatio, setAspectRatio] = useState('3/4'); // Varsayılan değer
 
     // Lightbox State
     const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -15,6 +18,18 @@ const PostCard = ({ post, onDelete, onEdit }) => {
 
     // Format Date using util
     const dateFormatted = formatDate(created_at);
+
+    // Calculate aspect ratio based on the first image
+    useEffect(() => {
+        if (post_images && post_images.length > 0) {
+            const img = new Image();
+            img.src = post_images[0].image_url;
+            img.onload = () => {
+                const ratio = img.naturalWidth / img.naturalHeight;
+                setAspectRatio(`${img.naturalWidth} / ${img.naturalHeight}`);
+            };
+        }
+    }, [post_images]);
 
     useEffect(() => {
         if (textRef.current) {
@@ -85,29 +100,29 @@ const PostCard = ({ post, onDelete, onEdit }) => {
 
                         {/* Header: Name and Date */}
                         <div className="flex items-center justify-between" style={{ marginBottom: '0.25rem' }}>
-                            {/* Name */}
-                            <span className="font-bold">{profiles?.display_name || 'Alper Ercan'}</span>
-
-                            {/* Date and Actions */}
-                            <div className="flex items-center gap-3">
-                                <span className="text-gray" style={{ fontSize: '1rem' }}>{dateFormatted}</span>
-
-                                {/* Admin Actions */}
-                                {(onEdit || onDelete) && (
-                                    <div className="flex items-center gap-2">
-                                        {onEdit && (
-                                            <button onClick={() => onEdit(post)} style={{ color: 'var(--blue)', padding: '2px' }} title="Düzenle">
-                                                <Edit size={16} />
-                                            </button>
-                                        )}
-                                        {onDelete && (
-                                            <button onClick={() => onDelete(post.id)} style={{ color: '#ff3b30', padding: '2px' }} title="Sil">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
+                            {/* Name and Date Column */}
+                            <div className="flex-col">
+                                <span style={{ fontWeight: '600' }}>{profiles?.display_name || 'Alper Ercan'}</span>
+                                <span className="text-gray" style={{ fontSize: '0.85rem' }}>
+                                    {dateFormatted}{location && `, ${location}`}
+                                </span>
                             </div>
+
+                            {/* Admin Actions */}
+                            {(onEdit || onDelete) && (
+                                <div className="flex items-center gap-2">
+                                    {onEdit && (
+                                        <button onClick={() => onEdit(post)} style={{ color: 'var(--blue)', padding: '2px' }} title="Düzenle">
+                                            <Edit size={16} />
+                                        </button>
+                                    )}
+                                    {onDelete && (
+                                        <button onClick={() => onDelete(post.id)} style={{ color: '#ff3b30', padding: '2px' }} title="Sil">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Text Content */}
@@ -169,7 +184,7 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                                                 flex: '0 0 100%',
                                                 scrollSnapAlign: 'start',
                                                 position: 'relative',
-                                                aspectRatio: '16/9',
+                                                aspectRatio: aspectRatio, // Dinamik oran burada uygulanıyor
                                                 overflow: 'hidden',
                                                 borderRadius: '12px',
                                                 cursor: 'pointer'
@@ -207,8 +222,9 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                                                 key={i}
                                                 style={{
                                                     width: '6px', height: '6px', borderRadius: '50%',
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                                                    backgroundColor: i === currentImageIndex ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                                    transition: 'background-color 0.2s'
                                                 }}
                                             />
                                         ))}
