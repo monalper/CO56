@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/PostCard';
-import CreatePost from '../components/CreatePost';
+
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
@@ -60,10 +60,6 @@ const Home = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Akış</h2>
             </div>
 
-            {/* Create Post (Only if logged in) */}
-            {session && (
-                <CreatePost onPostCreated={fetchPosts} profile={profile} />
-            )}
 
             {/* Feed */}
             <div className="feed" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>

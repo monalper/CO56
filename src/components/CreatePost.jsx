@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Image as ImageIcon, X, MapPin } from 'lucide-react';
 
-const CreatePost = ({ onPostCreated, profile }) => {
-    const [content, setContent] = useState('');
-    const [location, setLocation] = useState('');
-    const [showLocation, setShowLocation] = useState(false);
+const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
+    const [content, setContent] = useState(editPost?.content || '');
+    const [location, setLocation] = useState(editPost?.location || '');
+    const [showLocation, setShowLocation] = useState(!!editPost?.location);
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
+
+    useEffect(() => {
+        if (editPost) {
+            setContent(editPost.content || '');
+            setLocation(editPost.location || '');
+            setShowLocation(!!editPost.location);
+        }
+    }, [editPost]);
 
     const handleFileChange = (e) => {
         if (e.target.files) {
@@ -28,20 +36,34 @@ const CreatePost = ({ onPostCreated, profile }) => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
 
-            // 1. Create Post record
-            const { data: postData, error: postError } = await supabase
-                .from('posts')
-                .insert({
-                    user_id: user.id,
-                    content: content,
-                    location: (showLocation && location) ? location : null
-                })
-                .select()
-                .single();
+            let postId = editPost?.id;
 
-            if (postError) throw postError;
+            if (editPost) {
+                // Update existing post
+                const { error: updateError } = await supabase
+                    .from('posts')
+                    .update({
+                        content: content,
+                        location: (showLocation && location) ? location : null
+                    })
+                    .eq('id', editPost.id);
 
-            const postId = postData.id;
+                if (updateError) throw updateError;
+            } else {
+                // 1. Create Post record
+                const { data: postData, error: postError } = await supabase
+                    .from('posts')
+                    .insert({
+                        user_id: user.id,
+                        content: content,
+                        location: (showLocation && location) ? location : null
+                    })
+                    .select()
+                    .single();
+
+                if (postError) throw postError;
+                postId = postData.id;
+            }
 
             // 2. Upload Images
             if (files.length > 0) {
@@ -228,7 +250,7 @@ const CreatePost = ({ onPostCreated, profile }) => {
                                     opacity: (uploading || (!content.trim() && files.length === 0)) ? 0.5 : 1
                                 }}
                             >
-                                {uploading ? 'Paylaşılıyor...' : 'Paylaş'}
+                                {uploading ? (editPost ? 'Güncelleniyor...' : 'Paylaşılıyor...') : (editPost ? 'Güncelle' : 'Paylaş')}
                             </button>
                         </div>
                     </form>

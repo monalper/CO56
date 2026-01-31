@@ -1,17 +1,74 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { formatDate } from '../lib/utils';
 import { LinkifiedText } from './LinkifiedText';
-import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal, Flag, UserX } from 'lucide-react';
 
-const PostCard = ({ post, onDelete, onEdit }) => {
+const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
     const navigate = useNavigate();
-    const { content, profiles, post_images, created_at, location, user_id } = post;
+    const { id: postId, content, profiles, post_images, created_at, location, user_id } = post;
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
     const textRef = useRef(null);
     const menuRef = useRef(null);
+
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setCurrentUserId(session?.user?.id || null);
+        };
+        getSession();
+    }, []);
+
+    const isOurPost = currentUserId === user_id;
+
+    // Internal actions
+    const internalEdit = (e) => {
+        e.stopPropagation();
+        setShowMenu(false);
+        if (onEdit) {
+            onEdit(post);
+        } else {
+            navigate(`/edit/${postId}`);
+        }
+    };
+
+    const internalDelete = async (e) => {
+        e.stopPropagation();
+        setShowMenu(false);
+
+        if (onDelete) {
+            onDelete(postId);
+        } else {
+            if (!window.confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return;
+            try {
+                const { error } = await supabase.from('posts').delete().eq('id', postId);
+                if (error) throw error;
+                // If we are in detail view, go back. Otherwise window reload or handle via state?
+                // For now, let's just reload or alert.
+                if (isDetailView) navigate(-1);
+                else window.location.reload();
+            } catch (err) {
+                alert('Silme hatası: ' + err.message);
+            }
+        }
+    };
+
+    // Placeholder actions
+    const handleReport = (e) => {
+        e.stopPropagation();
+        setShowMenu(false);
+        alert('Bu gönderi şikayet edildi.');
+    };
+
+    const handleBlock = (e) => {
+        e.stopPropagation();
+        setShowMenu(false);
+        alert('Bu kullanıcı engellendi.');
+    };
 
     // Dynamic Aspect Ratio State
     const [aspectRatio, setAspectRatio] = useState('3/4'); // Varsayılan değer
@@ -19,6 +76,16 @@ const PostCard = ({ post, onDelete, onEdit }) => {
     // Lightbox State
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Navigation helper
+    const goToDetail = (e) => {
+        // Don't navigate if we are already in detail view or if clicking interactive elements
+        if (isDetailView) return;
+
+        // Profiles might not have username if not fetched correctly, fallback to user_id or 'user'
+        const username = profiles?.username || 'user';
+        navigate(`/@${username}/status/${postId}`);
+    };
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -93,14 +160,19 @@ const PostCard = ({ post, onDelete, onEdit }) => {
 
     return (
         <>
-            <div className="card" style={{
-                background: 'transparent',
-                padding: '1rem',
-                marginBottom: '1rem',
-                borderBottom: '1px solid var(--gray-200)',
-                borderRadius: 0,
-                position: 'relative'
-            }}>
+            <div
+                className="card"
+                onClick={goToDetail}
+                style={{
+                    background: 'transparent',
+                    padding: '1rem',
+                    marginBottom: '0',
+                    borderBottom: isDetailView ? 'none' : '1px solid var(--gray-200)',
+                    borderRadius: 0,
+                    position: 'relative',
+                    cursor: isDetailView ? 'default' : 'pointer'
+                }}
+            >
                 {/* Header Row: Avatar + Name + Date + Menu */}
                 <div className="flex gap-4 items-center" style={{ marginBottom: '0.5rem' }}>
                     {/* Avatar */}
@@ -127,49 +199,45 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                         </span>
                     </div>
 
-                    {/* Admin Actions (Dropdown Menu) */}
-                    {(onEdit || onDelete) && (
-                        <div style={{ position: 'relative' }} ref={menuRef}>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowMenu(!showMenu);
-                                }}
-                                style={{
-                                    color: 'var(--gray-500)',
-                                    padding: '8px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'background-color 0.2s',
-                                }}
-                                className="hover-gray"
-                            >
-                                <MoreHorizontal size={18} />
-                            </button>
+                    {/* Actions Dropdown */}
+                    <div style={{ position: 'relative' }} ref={menuRef}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowMenu(!showMenu);
+                            }}
+                            style={{
+                                color: 'var(--gray-500)',
+                                padding: '8px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'background-color 0.2s',
+                            }}
+                            className="hover-gray"
+                        >
+                            <MoreHorizontal size={18} />
+                        </button>
 
-                            {showMenu && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    right: 0,
-                                    backgroundColor: 'white',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-                                    border: '1px solid var(--gray-200)',
-                                    zIndex: 100,
-                                    minWidth: '150px',
-                                    overflow: 'hidden',
-                                    marginTop: '4px'
-                                }}>
-                                    {onEdit && (
+                        {showMenu && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                backgroundColor: 'white',
+                                borderRadius: '12px',
+                                boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                                border: '1px solid var(--gray-200)',
+                                zIndex: 100,
+                                minWidth: '190px',
+                                overflow: 'hidden',
+                                marginTop: '4px'
+                            }}>
+                                {isOurPost ? (
+                                    <>
                                         <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowMenu(false);
-                                                onEdit(post);
-                                            }}
+                                            onClick={internalEdit}
                                             style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -185,14 +253,8 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                                             <Edit size={18} color="var(--blue)" />
                                             <span>Düzenle</span>
                                         </button>
-                                    )}
-                                    {onDelete && (
                                         <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowMenu(false);
-                                                onDelete(post.id);
-                                            }}
+                                            onClick={internalDelete}
                                             style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -209,11 +271,49 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                                             <Trash2 size={18} />
                                             <span style={{ fontWeight: '600' }}>Sil</span>
                                         </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={handleReport}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                width: '100%',
+                                                fontSize: '15px',
+                                                textAlign: 'left',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            className="dropdown-item"
+                                        >
+                                            <Flag size={18} color="var(--gray-500)" />
+                                            <span>Şikayet Et</span>
+                                        </button>
+                                        <button
+                                            onClick={handleBlock}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                width: '100%',
+                                                fontSize: '15px',
+                                                color: '#F4212E',
+                                                textAlign: 'left',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            className="dropdown-item"
+                                        >
+                                            <UserX size={18} />
+                                            <span style={{ fontWeight: '600' }}>Kullanıcıyı Engelle</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Dropdown Styles */}
@@ -248,7 +348,10 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                             </div>
                             {isOverflowing && !isExpanded && (
                                 <button
-                                    onClick={() => setIsExpanded(true)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsExpanded(true);
+                                    }}
                                     style={{ color: 'var(--blue)', fontSize: '0.9rem', marginTop: '0.25rem', padding: '0' }}
                                 >
                                     Daha fazla

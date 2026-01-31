@@ -267,6 +267,23 @@ const WhoToFollow = () => {
     );
 };
 
+const Footer = () => {
+    const currentYear = new Date().getFullYear();
+    return (
+        <nav className="sidebar-footer">
+            <Link to="/terms" className="footer-link">Hizmet Şartları</Link>
+            <Link to="/privacy" className="footer-link">Gizlilik Politikası</Link>
+            <Link to="/cookies" className="footer-link">Çerez Politikası</Link>
+            <Link to="/accessibility" className="footer-link">Erişilebilirlik</Link>
+            <Link to="/ads-info" className="footer-link">Reklam Bilgisi</Link>
+            <div className="footer-more">
+                <span className="footer-link">Daha fazla...</span>
+            </div>
+            <span className="footer-copyright">© {currentYear} CO56 Corp.</span>
+        </nav>
+    );
+};
+
 // --- Main Sidebar Component ---
 const RightSidebar = () => {
     return (
@@ -278,11 +295,12 @@ const RightSidebar = () => {
             flexDirection: 'column',
             gap: '16px',
             position: 'sticky',
-            top: '10px',
+            top: '66px',
             height: 'fit-content'
         }}>
             <SearchBox />
             <WhoToFollow />
+            <Footer />
 
             <style>{`
                 .widget-box {
@@ -314,6 +332,33 @@ const RightSidebar = () => {
                 }
                 .hover-bg-light:hover {
                     background-color: rgba(15, 20, 25, 0.05);
+                }
+                .sidebar-footer {
+                    display: flex;
+                    flex-wrap: wrap;
+                    padding: 0 16px;
+                    gap: 0 12px;
+                    margin-top: 4px;
+                }
+                .footer-link {
+                    color: var(--gray-500);
+                    font-size: 13px;
+                    line-height: 20px;
+                    text-decoration: none;
+                }
+                .footer-link:hover {
+                    text-decoration: underline;
+                }
+                .footer-copyright {
+                    color: var(--gray-500);
+                    font-size: 13px;
+                    line-height: 20px;
+                    width: 100%;
+                    margin-top: 2px;
+                }
+                .footer-more {
+                    display: flex;
+                    align-items: center;
                 }
             `}</style>
         </div>

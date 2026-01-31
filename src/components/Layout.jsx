@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import RightSidebar from './RightSidebar';
-import { Home, Search } from 'lucide-react';
+import Header from './Header';
+import { Home, Search, PlusCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Layout = () => {
@@ -31,7 +32,8 @@ const Layout = () => {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Header />
             <div className="main-layout">
                 <header className="sidebar-wrapper">
                     <Sidebar />
@@ -67,6 +69,13 @@ const Layout = () => {
                         fill={isActive('/search') ? 'currentColor' : 'none'}
                     />
                 </Link>
+                <Link to="/create" className={`bottom-nav-item ${isActive('/create') ? 'active' : ''}`}>
+                    <PlusCircle
+                        size={26}
+                        strokeWidth={isActive('/create') ? 2.5 : 2}
+                        fill={isActive('/create') ? 'currentColor' : 'none'}
+                    />
+                </Link>
                 <Link to={profile?.username ? `/@${profile.username}` : "/profile"} className={`bottom-nav-item ${location.pathname.startsWith('/@') || isActive('/profile') ? 'active' : ''}`}>
                     <div style={{
                         width: '28px',
@@ -87,7 +96,7 @@ const Layout = () => {
                     </div>
                 </Link>
             </nav>
-        </>
+        </div>
     );
 };
 

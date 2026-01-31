@@ -8,7 +8,11 @@ import SearchPage from './pages/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
 import UserProfiles from './pages/UserProfiles';
 import Settings from './pages/Settings';
+import CreatePostPage from './pages/CreatePostPage';
+import PostDetailPage from './pages/PostDetailPage';
 import Layout from './components/Layout';
+
+import { TermsPage, PrivacyPage, CookiesPage, AccessibilityPage, AdsInfoPage } from './pages/StaticPages';
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 
@@ -59,7 +63,17 @@ function App() {
           {/* Profile Routes */}
           <Route path="/profile" element={<UserProfiles />} />
           <Route path="/:username" element={<UserProfiles />} />
+          <Route path="/:username/status/:postId" element={<PostDetailPage />} />
+          <Route path="/create" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
+          <Route path="/edit/:postId" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
           <Route path="/settings" element={<Settings />} />
+
+          {/* Static Pages */}
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/accessibility" element={<AccessibilityPage />} />
+          <Route path="/ads-info" element={<AdsInfoPage />} />
         </Route>
 
         {/* Standalone Pages */}
