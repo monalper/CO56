@@ -12,50 +12,68 @@ const UserProfiles = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
     const navigate = useNavigate();
-    const { userId } = useParams();
+    const { username: rawUsername } = useParams();
+    const username = rawUsername?.startsWith('@') ? rawUsername.substring(1) : rawUsername;
 
     useEffect(() => {
         fetchProfileData();
-    }, [userId]);
+    }, [username]);
 
     const fetchProfileData = async () => {
         setLoading(true);
         try {
             const { data: { user: currentUser } } = await supabase.auth.getUser();
-            const targetUserId = userId || currentUser?.id;
 
-            if (!targetUserId) {
+            let profileData = null;
+            let profileError = null;
+
+            if (username && username !== 'profile') {
+                // Fetch by username
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('username', username)
+                    .single();
+                profileData = data;
+                profileError = error;
+            } else if (currentUser) {
+                // Own profile from /profile
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                profileData = data;
+                profileError = error;
+            } else {
                 navigate('/admin/login');
                 return;
             }
 
-            setUser(currentUser);
-
-            // Fetch Profile
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', targetUserId)
-                .single();
-
             if (profileError) {
                 console.error("Profile fetch error:", profileError);
             }
-            setProfile(profileData);
 
-            // Fetch Posts
-            const { data: postsData, error: postsError } = await supabase
-                .from('posts')
-                .select(`
-                    *,
-                    profiles (id, display_name, avatar_url),
-                    post_images (id, image_url)
-                `)
-                .eq('user_id', targetUserId)
-                .order('created_at', { ascending: false });
+            if (profileData) {
+                setProfile(profileData);
+                document.title = `${profileData.display_name} (@${profileData.username}) | CO56`;
 
-            if (postsError) throw postsError;
-            setPosts(postsData || []);
+                // Fetch Posts
+                const { data: postsData, error: postsError } = await supabase
+                    .from('posts')
+                    .select(`
+                        *,
+                        profiles (id, display_name, avatar_url, username),
+                        post_images (id, image_url)
+                    `)
+                    .eq('user_id', profileData.id)
+                    .order('created_at', { ascending: false });
+
+                if (postsError) throw postsError;
+                setPosts(postsData || []);
+            }
+
+            setUser(currentUser);
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -91,7 +109,7 @@ const UserProfiles = () => {
         );
     }
 
-    const isOwnProfile = !userId || (user && user.id === userId);
+    const isOwnProfile = user && profile && user.id === profile.id;
 
     return (
         <div style={{ width: '100%', minHeight: '100vh', background: '#fff' }}>

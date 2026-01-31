@@ -10,6 +10,7 @@ const Home = () => {
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
+        document.title = "Anasayfa | CO56";
         fetchPosts();
         checkSession();
     }, []);
@@ -50,7 +51,14 @@ const Home = () => {
 
     return (
         <div className="container" style={{ padding: '0' }}>
-
+            {/* Header Title */}
+            <div style={{
+                padding: '16px',
+                borderBottom: '1px solid #eff3f4',
+                textAlign: 'center'
+            }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Akış</h2>
+            </div>
 
             {/* Create Post (Only if logged in) */}
             {session && (

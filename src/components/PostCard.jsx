@@ -106,7 +106,8 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                     {/* Avatar */}
                     <div style={{ flexShrink: 0, cursor: 'pointer' }} onClick={(e) => {
                         e.stopPropagation();
-                        if (user_id) navigate(`/profile/${user_id}`);
+                        if (profiles?.username) navigate(`/@${profiles.username}`);
+                        else if (user_id) navigate(`/profile`);
                     }}>
                         <div className="avatar" style={{
                             backgroundImage: profiles?.avatar_url ? `url(${profiles.avatar_url})` : 'none',
@@ -117,7 +118,8 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                     {/* Name and Date */}
                     <div className="flex-col" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={(e) => {
                         e.stopPropagation();
-                        if (user_id) navigate(`/profile/${user_id}`);
+                        if (profiles?.username) navigate(`/@${profiles.username}`);
+                        else if (user_id) navigate(`/profile`);
                     }}>
                         <span style={{ fontWeight: '600', lineHeight: '1.2' }}>{profiles?.display_name || 'Alper Ercan'}</span>
                         <span className="text-gray" style={{ fontSize: '0.85rem', lineHeight: '1.2', marginTop: '2px' }}>

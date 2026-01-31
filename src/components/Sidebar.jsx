@@ -65,8 +65,8 @@ const Sidebar = () => {
         }}>
             {/* Logo */}
             <div style={{ padding: '12px', marginBottom: '4px' }}>
-                <Link to="/" style={{ display: 'flex' }}>
-                    <img src="/logo.svg" alt="CO56" style={{ height: '30px', width: 'auto' }} />
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: '#0f1419' }}>
+                    <img src="/logo.svg" alt="CO56" style={{ height: '26px', width: '26px' }} />
                 </Link>
             </div>
 
@@ -80,7 +80,7 @@ const Sidebar = () => {
 
             {/* Bottom Profile / User Section (Twitter Style) */}
             {session ? (
-                <Link to="/profile" className="user-pill" style={{
+                <Link to={profile?.username ? `/@${profile.username}` : "/profile"} className="user-pill" style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
@@ -117,7 +117,6 @@ const Sidebar = () => {
                             @{profile?.username || 'username'}
                         </span>
                     </div>
-                    <MoreHorizontal size={18} />
                 </Link>
             ) : (
                 <Link to="/admin/login" className="user-pill" style={{

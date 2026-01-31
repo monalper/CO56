@@ -58,7 +58,7 @@ function App() {
           />
           {/* Profile Routes */}
           <Route path="/profile" element={<UserProfiles />} />
-          <Route path="/profile/:userId" element={<UserProfiles />} />
+          <Route path="/:username" element={<UserProfiles />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
 
