@@ -1,14 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/PostCard';
+import CreatePost from '../components/CreatePost';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [session, setSession] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     useEffect(() => {
         fetchPosts();
+        checkSession();
     }, []);
+
+    const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        if (session?.user) {
+            const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            setProfile(profileData);
+        }
+    };
 
     const fetchPosts = async () => {
         try {
@@ -32,15 +49,20 @@ const Home = () => {
     };
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div className="container" style={{ padding: '0' }}>
 
+
+            {/* Create Post (Only if logged in) */}
+            {session && (
+                <CreatePost onPostCreated={fetchPosts} profile={profile} />
+            )}
 
             {/* Feed */}
             <div className="feed" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                 {loading ? (
-                    <p className="text-gray" style={{ textAlign: 'center' }}>Yükleniyor...</p>
+                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Yükleniyor...</p>
                 ) : posts.length === 0 ? (
-                    <p className="text-gray" style={{ textAlign: 'center' }}>Henüz paylaşım yok.</p>
+                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Henüz paylaşım yok.</p>
                 ) : (
                     posts.map(post => (
                         <PostCard key={post.id} post={post} />

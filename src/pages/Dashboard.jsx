@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { LogOut, Image as ImageIcon, X, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import CreatePost from '../components/CreatePost';
 
 const Dashboard = () => {
     const [content, setContent] = useState('');
@@ -345,78 +346,57 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* Create/Edit Post Form */}
-            <div className="card" style={{ marginBottom: '2rem', borderRadius: '12px', border: '1px solid #f0f0f0' }}>
-                <form onSubmit={handleSubmit}>
-                    {editingPostId && (
-                        <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
-                            <span className="text-sm font-bold text-blue-500" style={{ color: 'var(--blue)' }}>Gönderi Düzenleniyor</span>
-                            <button type="button" onClick={cancelEdit} className="text-sm text-gray" style={{ color: 'red' }}>İptal</button>
-                        </div>
-                    )}
-                    <textarea
-                        className="input-field"
-                        placeholder="Neler oluyor?"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        style={{ minHeight: '100px', resize: 'vertical', background: 'transparent', padding: '0' }}
-                    />
-
-                    {/* Location Input */}
-                    <input
-                        type="text"
-                        className="input-field"
-                        placeholder="Konum (opsiyonel)"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        style={{ marginTop: '0.5rem', fontSize: '0.9rem', padding: '0.5rem 0' }}
-                    />
-
-                    {/* Image Previews */}
-                    {files.length > 0 && (
-                        <div className="flex gap-2" style={{ overflowX: 'auto', padding: '0.5rem 0' }}>
-                            {files.map((file, i) => (
-                                <div key={i} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        alt="preview"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeFile(i)}
-                                        style={{
-                                            position: 'absolute', top: -5, right: -5,
-                                            background: 'black', color: 'white',
-                                            borderRadius: '50%', padding: '2px'
-                                        }}>
-                                        <X size={12} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="flex items-center justify-between" style={{ marginTop: '1rem', paddingTop: '1rem' }}>
-                        <label style={{ cursor: 'pointer', color: 'var(--blue)' }}>
-                            <ImageIcon size={20} />
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
+            {/* Post Form (Create or Edit) */}
+            <div style={{ marginBottom: '2rem' }}>
+                {editingPostId ? (
+                    <div className="card" style={{ borderRadius: '12px', border: '1px solid #f0f0f0' }}>
+                        <form onSubmit={handleSubmit}>
+                            <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
+                                <span className="text-sm font-bold text-blue-500" style={{ color: 'var(--blue)' }}>Gönderi Düzenleniyor</span>
+                                <button type="button" onClick={cancelEdit} className="text-sm text-gray" style={{ color: 'red' }}>İptal</button>
+                            </div>
+                            <textarea
+                                className="input-field"
+                                placeholder="Neler oluyor?"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                style={{ minHeight: '100px', resize: 'vertical', background: 'transparent', padding: '0' }}
                             />
-                        </label>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={uploading || (!content && files.length === 0)}
-                        >
-                            {uploading ? (editingPostId ? 'Güncelleniyor...' : 'Paylaşılıyor...') : (editingPostId ? 'Güncelle' : 'Paylaş')}
-                        </button>
+                            <input
+                                type="text"
+                                className="input-field"
+                                placeholder="Konum (opsiyonel)"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                style={{ marginTop: '0.5rem', fontSize: '0.9rem', padding: '0.5rem 0' }}
+                            />
+                            {/* Image previews and upload for edit remains the same */}
+                            {files.length > 0 && (
+                                <div className="flex gap-2" style={{ overflowX: 'auto', padding: '0.5rem 0' }}>
+                                    {files.map((file, i) => (
+                                        <div key={i} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0 }}>
+                                            <img
+                                                src={URL.createObjectURL(file)}
+                                                alt="preview"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                                            />
+                                            <button type="button" onClick={() => removeFile(i)} style={{ position: 'absolute', top: -5, right: -5, background: 'black', color: 'white', borderRadius: '50%', padding: '2px' }}><X size={12} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between" style={{ marginTop: '1rem', paddingTop: '1rem' }}>
+                                <label style={{ cursor: 'pointer', color: 'var(--blue)' }}>
+                                    <ImageIcon size={20} />
+                                    <input type="file" accept="image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} />
+                                </label>
+                                <button type="submit" className="btn-primary" disabled={uploading}>Güncelle</button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                ) : (
+                    <CreatePost onPostCreated={fetchData} profile={profile} />
+                )}
             </div>
 
             {/* Your Posts */}

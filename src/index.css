@@ -58,7 +58,7 @@ textarea {
 .main-layout {
   display: flex;
   justify-content: center;
-  max-width: 1265px;
+  max-width: 1365px;
   margin: 0 auto;
   min-height: 100vh;
 }
@@ -70,7 +70,7 @@ textarea {
 }
 
 .content-area {
-  width: 600px;
+  width: 700px;
   flex-shrink: 0;
   border-right: 1px solid var(--gray-200);
   border-left: 1px solid var(--gray-200);
@@ -265,7 +265,7 @@ textarea {
 
   .content-area {
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     border-right: none;
   }
 }

@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SearchPage from './pages/SearchPage';
+import NotFoundPage from './pages/NotFoundPage';
 import Layout from './components/Layout';
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
@@ -55,6 +56,7 @@ function App() {
 
         {/* Standalone Pages */}
         <Route path="/admin/login" element={<Login />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );

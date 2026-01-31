@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { formatDate } from '../lib/utils';
 import { LinkifiedText } from './LinkifiedText';
-import { Trash2, Edit, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 const PostCard = ({ post, onDelete, onEdit }) => {
     const { content, profiles, post_images, created_at, location } = post;
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
     const textRef = useRef(null);
+    const menuRef = useRef(null);
 
     // Dynamic Aspect Ratio State
     const [aspectRatio, setAspectRatio] = useState('3/4'); // Varsayılan değer
@@ -15,6 +17,17 @@ const PostCard = ({ post, onDelete, onEdit }) => {
     // Lightbox State
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Format Date using util
     const dateFormatted = formatDate(created_at);
@@ -108,22 +121,104 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                                 </span>
                             </div>
 
-                            {/* Admin Actions */}
+                            {/* Admin Actions (Dropdown Menu) */}
                             {(onEdit || onDelete) && (
-                                <div className="flex items-center gap-2">
-                                    {onEdit && (
-                                        <button onClick={() => onEdit(post)} style={{ color: 'var(--blue)', padding: '2px' }} title="Düzenle">
-                                            <Edit size={16} />
-                                        </button>
-                                    )}
-                                    {onDelete && (
-                                        <button onClick={() => onDelete(post.id)} style={{ color: '#ff3b30', padding: '2px' }} title="Sil">
-                                            <Trash2 size={16} />
-                                        </button>
+                                <div style={{ position: 'relative' }} ref={menuRef}>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowMenu(!showMenu);
+                                        }}
+                                        style={{
+                                            color: 'var(--gray-500)',
+                                            padding: '8px',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            transition: 'background-color 0.2s',
+                                        }}
+                                        className="hover-gray"
+                                    >
+                                        <MoreHorizontal size={18} />
+                                    </button>
+
+                                    {showMenu && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            right: 0,
+                                            backgroundColor: 'white',
+                                            borderRadius: '12px',
+                                            boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                                            border: '1px solid var(--gray-200)',
+                                            zIndex: 100,
+                                            minWidth: '150px',
+                                            overflow: 'hidden',
+                                            marginTop: '4px'
+                                        }}>
+                                            {onEdit && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowMenu(false);
+                                                        onEdit(post);
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px',
+                                                        padding: '12px 16px',
+                                                        width: '100%',
+                                                        fontSize: '15px',
+                                                        textAlign: 'left',
+                                                        transition: 'background-color 0.2s'
+                                                    }}
+                                                    className="dropdown-item"
+                                                >
+                                                    <Edit size={18} color="var(--blue)" />
+                                                    <span>Düzenle</span>
+                                                </button>
+                                            )}
+                                            {onDelete && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowMenu(false);
+                                                        onDelete(post.id);
+                                                    }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px',
+                                                        padding: '12px 16px',
+                                                        width: '100%',
+                                                        fontSize: '15px',
+                                                        color: '#F4212E',
+                                                        textAlign: 'left',
+                                                        transition: 'background-color 0.2s'
+                                                    }}
+                                                    className="dropdown-item"
+                                                >
+                                                    <Trash2 size={18} />
+                                                    <span style={{ fontWeight: '600' }}>Sil</span>
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             )}
                         </div>
+
+                        {/* Dropdown Styles */}
+                        <style>{`
+                            .hover-gray:hover {
+                                background-color: rgba(15, 20, 25, 0.1);
+                            }
+                            .dropdown-item:hover {
+                                background-color: rgba(0, 0, 0, 0.03);
+                            }
+                        `}</style>
 
                         {/* Text Content */}
                         {content && (
