@@ -1,9 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import SearchPage from './pages/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
+import UserProfiles from './pages/UserProfiles';
+import Settings from './pages/Settings';
 import Layout from './components/Layout';
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
@@ -30,7 +34,7 @@ function ProtectedRoute({ children }) {
   if (loading) return null;
 
   if (!session) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -52,10 +56,18 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Profile Routes */}
+          <Route path="/profile" element={<UserProfiles />} />
+          <Route path="/profile/:userId" element={<UserProfiles />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* Standalone Pages */}
+        <Route path="/login" element={<Login />} />
         <Route path="/admin/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

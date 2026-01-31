@@ -6,18 +6,49 @@ import { supabase } from '../lib/supabase';
 const Sidebar = () => {
     const location = useLocation();
     const [session, setSession] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     useEffect(() => {
+        // Initial Session Check
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+            }
         });
 
+        // Auth Listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+            } else {
+                setProfile(null);
+            }
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
+    const fetchProfile = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching profile for sidebar:', error);
+                return;
+            }
+            if (data) {
+                setProfile(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const isActive = (path) => location.pathname === path;
 
@@ -45,24 +76,11 @@ const Sidebar = () => {
                     <Home size={26} fill={isActive('/') ? 'currentColor' : 'none'} />
                     <span>Anasayfa</span>
                 </Link>
-
-                {/* Panel Link removed as requested for sidebar, but Login/Dash logic remains for routing access. 
-                    If admin wants to access dashboard, they might need a direct link or hidden way if completely removed from UI.
-                    User asked: "Panel linki olmamalı."
-                    I will remove the visible link. If they are logged in, maybe show "Profil" which goes to dash?
-                    Or just remove it completely from visual sidebar.
-                */}
-
-                {/* If session exists, maybe a Profile link creates a way to get to dash? 
-                    Twitter has "Profile".
-                    User said: "Bu site ... paylaşım yapacak olan tek kişi ben olacağım."
-                    So access to dash is crucial. Maybe clicking User/Profile goes to Dash.
-                */}
             </nav>
 
             {/* Bottom Profile / User Section (Twitter Style) */}
             {session ? (
-                <Link to="/admin/dash" className="user-pill" style={{
+                <Link to="/profile" className="user-pill" style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
@@ -74,10 +92,30 @@ const Sidebar = () => {
                     marginBottom: '12px',
                     transition: 'background-color 0.2s'
                 }}>
-                    <div className="avatar" style={{ width: '40px', height: '40px', background: '#ccc' }}></div>
-                    <div className="flex-col" style={{ flex: 1 }}>
-                        <span className="font-bold text-sm">Alper Ercan</span>
-                        <span className="text-gray text-sm">@alperercan</span>
+                    <div className="avatar" style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ccc',
+                        backgroundImage: profile?.avatar_url ? `url(${profile.avatar_url})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    }}>
+                        {!profile?.avatar_url && (
+                            <img
+                                src={`https://ui-avatars.com/api/?name=${profile?.display_name || 'User'}&background=random`}
+                                alt="Avatar"
+                                style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                            />
+                        )}
+                    </div>
+                    <div className="flex-col" style={{ flex: 1, overflow: 'hidden' }}>
+                        <span className="font-bold text-sm truncate" style={{ display: 'block' }}>
+                            {profile?.display_name || 'Kullanıcı'}
+                        </span>
+                        <span className="text-gray text-sm truncate" style={{ display: 'block' }}>
+                            @{profile?.username || 'username'}
+                        </span>
                     </div>
                     <MoreHorizontal size={18} />
                 </Link>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../lib/utils';
 import { LinkifiedText } from './LinkifiedText';
 import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 const PostCard = ({ post, onDelete, onEdit }) => {
-    const { content, profiles, post_images, created_at, location } = post;
+    const navigate = useNavigate();
+    const { content, profiles, post_images, created_at, location, user_id } = post;
     const [isExpanded, setIsExpanded] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -99,235 +101,238 @@ const PostCard = ({ post, onDelete, onEdit }) => {
                 borderRadius: 0,
                 position: 'relative'
             }}>
-                <div className="flex gap-4">
+                {/* Header Row: Avatar + Name + Date + Menu */}
+                <div className="flex gap-4 items-center" style={{ marginBottom: '0.5rem' }}>
                     {/* Avatar */}
-                    <div style={{ flexShrink: 0 }}>
+                    <div style={{ flexShrink: 0, cursor: 'pointer' }} onClick={(e) => {
+                        e.stopPropagation();
+                        if (user_id) navigate(`/profile/${user_id}`);
+                    }}>
                         <div className="avatar" style={{
                             backgroundImage: profiles?.avatar_url ? `url(${profiles.avatar_url})` : 'none',
                             backgroundSize: 'cover'
                         }} />
                     </div>
 
-                    {/* Content */}
-                    <div className="flex-col" style={{ flex: 1, minWidth: 0 }}>
+                    {/* Name and Date */}
+                    <div className="flex-col" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={(e) => {
+                        e.stopPropagation();
+                        if (user_id) navigate(`/profile/${user_id}`);
+                    }}>
+                        <span style={{ fontWeight: '600', lineHeight: '1.2' }}>{profiles?.display_name || 'Alper Ercan'}</span>
+                        <span className="text-gray" style={{ fontSize: '0.85rem', lineHeight: '1.2', marginTop: '2px' }}>
+                            {dateFormatted}{location && `, ${location}`}
+                        </span>
+                    </div>
 
-                        {/* Header: Name and Date */}
-                        <div className="flex items-center justify-between" style={{ marginBottom: '0.25rem' }}>
-                            {/* Name and Date Column */}
-                            <div className="flex-col">
-                                <span style={{ fontWeight: '600' }}>{profiles?.display_name || 'Alper Ercan'}</span>
-                                <span className="text-gray" style={{ fontSize: '0.85rem' }}>
-                                    {dateFormatted}{location && `, ${location}`}
-                                </span>
-                            </div>
+                    {/* Admin Actions (Dropdown Menu) */}
+                    {(onEdit || onDelete) && (
+                        <div style={{ position: 'relative' }} ref={menuRef}>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMenu(!showMenu);
+                                }}
+                                style={{
+                                    color: 'var(--gray-500)',
+                                    padding: '8px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'background-color 0.2s',
+                                }}
+                                className="hover-gray"
+                            >
+                                <MoreHorizontal size={18} />
+                            </button>
 
-                            {/* Admin Actions (Dropdown Menu) */}
-                            {(onEdit || onDelete) && (
-                                <div style={{ position: 'relative' }} ref={menuRef}>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowMenu(!showMenu);
-                                        }}
-                                        style={{
-                                            color: 'var(--gray-500)',
-                                            padding: '8px',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            transition: 'background-color 0.2s',
-                                        }}
-                                        className="hover-gray"
-                                    >
-                                        <MoreHorizontal size={18} />
-                                    </button>
-
-                                    {showMenu && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '100%',
-                                            right: 0,
-                                            backgroundColor: 'white',
-                                            borderRadius: '12px',
-                                            boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-                                            border: '1px solid var(--gray-200)',
-                                            zIndex: 100,
-                                            minWidth: '150px',
-                                            overflow: 'hidden',
-                                            marginTop: '4px'
-                                        }}>
-                                            {onEdit && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowMenu(false);
-                                                        onEdit(post);
-                                                    }}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '12px',
-                                                        padding: '12px 16px',
-                                                        width: '100%',
-                                                        fontSize: '15px',
-                                                        textAlign: 'left',
-                                                        transition: 'background-color 0.2s'
-                                                    }}
-                                                    className="dropdown-item"
-                                                >
-                                                    <Edit size={18} color="var(--blue)" />
-                                                    <span>Düzenle</span>
-                                                </button>
-                                            )}
-                                            {onDelete && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowMenu(false);
-                                                        onDelete(post.id);
-                                                    }}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '12px',
-                                                        padding: '12px 16px',
-                                                        width: '100%',
-                                                        fontSize: '15px',
-                                                        color: '#F4212E',
-                                                        textAlign: 'left',
-                                                        transition: 'background-color 0.2s'
-                                                    }}
-                                                    className="dropdown-item"
-                                                >
-                                                    <Trash2 size={18} />
-                                                    <span style={{ fontWeight: '600' }}>Sil</span>
-                                                </button>
-                                            )}
-                                        </div>
+                            {showMenu && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: 0,
+                                    backgroundColor: 'white',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                                    border: '1px solid var(--gray-200)',
+                                    zIndex: 100,
+                                    minWidth: '150px',
+                                    overflow: 'hidden',
+                                    marginTop: '4px'
+                                }}>
+                                    {onEdit && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowMenu(false);
+                                                onEdit(post);
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                width: '100%',
+                                                fontSize: '15px',
+                                                textAlign: 'left',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            className="dropdown-item"
+                                        >
+                                            <Edit size={18} color="var(--blue)" />
+                                            <span>Düzenle</span>
+                                        </button>
+                                    )}
+                                    {onDelete && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowMenu(false);
+                                                onDelete(post.id);
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px 16px',
+                                                width: '100%',
+                                                fontSize: '15px',
+                                                color: '#F4212E',
+                                                textAlign: 'left',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            className="dropdown-item"
+                                        >
+                                            <Trash2 size={18} />
+                                            <span style={{ fontWeight: '600' }}>Sil</span>
+                                        </button>
                                     )}
                                 </div>
                             )}
                         </div>
+                    )}
+                </div>
 
-                        {/* Dropdown Styles */}
-                        <style>{`
-                            .hover-gray:hover {
-                                background-color: rgba(15, 20, 25, 0.1);
-                            }
-                            .dropdown-item:hover {
-                                background-color: rgba(0, 0, 0, 0.03);
-                            }
-                        `}</style>
+                {/* Dropdown Styles */}
+                <style>{`
+                    .hover-gray:hover {
+                        background-color: rgba(15, 20, 25, 0.1);
+                    }
+                    .dropdown-item:hover {
+                        background-color: rgba(0, 0, 0, 0.03);
+                    }
+                `}</style>
 
-                        {/* Text Content */}
-                        {content && (
-                            <div style={{ marginBottom: '0.75rem' }}>
-                                <div
-                                    ref={textRef}
-                                    style={{
-                                        whiteSpace: 'pre-wrap',
-                                        fontSize: '15px',
-                                        lineHeight: '1.6',
-                                        display: '-webkit-box',
-                                        WebkitBoxOrient: 'vertical',
-                                        WebkitLineClamp: isExpanded ? 'unset' : 5,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                    }}
-                                >
-                                    <LinkifiedText text={content} />
-                                </div>
-                                {isOverflowing && !isExpanded && (
-                                    <button
-                                        onClick={() => setIsExpanded(true)}
-                                        style={{ color: 'var(--blue)', fontSize: '0.9rem', marginTop: '0.25rem', padding: '0' }}
-                                    >
-                                        Daha fazla
-                                    </button>
-                                )}
+                {/* Content Body */}
+                <div style={{ paddingLeft: '56px' }}>
+                    {/* Text Content */}
+                    {content && (
+                        <div style={{ marginBottom: '0.75rem' }}>
+                            <div
+                                ref={textRef}
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    fontSize: '15px',
+                                    lineHeight: '1.6',
+                                    display: '-webkit-box',
+                                    WebkitBoxOrient: 'vertical',
+                                    WebkitLineClamp: isExpanded ? 'unset' : 5,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                            >
+                                <LinkifiedText text={content} />
                             </div>
-                        )}
-
-                        {/* Images - Carousel Style */}
-                        {post_images && post_images.length > 0 && (
-                            <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-                                <div
-                                    className="image-carousel"
-                                    style={{
-                                        display: 'flex',
-                                        overflowX: 'auto',
-                                        scrollSnapType: 'x mandatory',
-                                        gap: '10px',
-                                        borderRadius: '12px',
-                                        scrollbarWidth: 'none',
-                                        msOverflowStyle: 'none'
-                                    }}
+                            {isOverflowing && !isExpanded && (
+                                <button
+                                    onClick={() => setIsExpanded(true)}
+                                    style={{ color: 'var(--blue)', fontSize: '0.9rem', marginTop: '0.25rem', padding: '0' }}
                                 >
-                                    <style>
-                                        {`
-                                .image-carousel::-webkit-scrollbar {
-                                    display: none;
-                                }
-                            `}
-                                    </style>
+                                    Daha fazla
+                                </button>
+                            )}
+                        </div>
+                    )}
 
-                                    {post_images.map((img, index) => (
-                                        <div
-                                            key={img.id}
+                    {/* Images - Carousel Style */}
+                    {post_images && post_images.length > 0 && (
+                        <div style={{ position: 'relative', marginTop: '0.5rem' }}>
+                            <div
+                                className="image-carousel"
+                                style={{
+                                    display: 'flex',
+                                    overflowX: 'auto',
+                                    scrollSnapType: 'x mandatory',
+                                    gap: '10px',
+                                    borderRadius: '12px',
+                                    scrollbarWidth: 'none',
+                                    msOverflowStyle: 'none'
+                                }}
+                            >
+                                <style>
+                                    {`
+                            .image-carousel::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}
+                                </style>
+
+                                {post_images.map((img, index) => (
+                                    <div
+                                        key={img.id}
+                                        style={{
+                                            flex: '0 0 100%',
+                                            scrollSnapAlign: 'start',
+                                            position: 'relative',
+                                            aspectRatio: aspectRatio, // Dinamik oran burada uygulanıyor
+                                            overflow: 'hidden',
+                                            borderRadius: '12px',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => openLightbox(index)}
+                                    >
+                                        <img
+                                            src={img.image_url}
+                                            alt="Post attachment"
                                             style={{
-                                                flex: '0 0 100%',
-                                                scrollSnapAlign: 'start',
-                                                position: 'relative',
-                                                aspectRatio: aspectRatio, // Dinamik oran burada uygulanıyor
-                                                overflow: 'hidden',
-                                                borderRadius: '12px',
-                                                cursor: 'pointer'
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
                                             }}
-                                            onClick={() => openLightbox(index)}
-                                        >
-                                            <img
-                                                src={img.image_url}
-                                                alt="Post attachment"
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    objectFit: 'cover'
-                                                }}
-                                            />
-                                        </div>
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Dots indicator if multiple images */}
+                            {post_images.length > 1 && (
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '15px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                    zIndex: 10,
+                                    pointerEvents: 'none'
+                                }}>
+                                    {post_images.map((_, i) => (
+                                        <div
+                                            key={i}
+                                            style={{
+                                                width: '6px', height: '6px', borderRadius: '50%',
+                                                backgroundColor: i === currentImageIndex ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                        />
                                     ))}
                                 </div>
-
-                                {/* Dots indicator if multiple images */}
-                                {post_images.length > 1 && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        bottom: '15px',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        gap: '6px',
-                                        zIndex: 10,
-                                        pointerEvents: 'none'
-                                    }}>
-                                        {post_images.map((_, i) => (
-                                            <div
-                                                key={i}
-                                                style={{
-                                                    width: '6px', height: '6px', borderRadius: '50%',
-                                                    backgroundColor: i === currentImageIndex ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                                                    boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                                                    transition: 'background-color 0.2s'
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
