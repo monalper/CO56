@@ -4,6 +4,7 @@ import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import { LinkifiedText } from '../components/LinkifiedText';
+import EndOfFeed from '../components/EndOfFeed';
 
 const UserProfiles = () => {
     const [user, setUser] = useState(null);
@@ -250,9 +251,14 @@ const UserProfiles = () => {
             <div style={{ minHeight: '200px' }}>
                 {posts.length > 0 ? (
                     <div>
-                        {activeTab === 'posts' && posts.map(post => (
-                            <PostCard key={post.id} post={post} />
-                        ))}
+                        {activeTab === 'posts' && (
+                            <>
+                                {posts.map(post => (
+                                    <PostCard key={post.id} post={post} />
+                                ))}
+                                <EndOfFeed />
+                            </>
+                        )}
                         {activeTab !== 'posts' && (
                             <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
                                 <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>Henüz içerik yok</span>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ChevronLeft, MoreHorizontal, MessageCircle, Heart, Share, Bookmark } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import PostCard from '../components/PostCard';
 import { formatDate } from '../lib/utils';
 
@@ -119,27 +119,6 @@ const PostDetailPage = () => {
                     <PostCard post={post} isDetailView={true} onEdit={handleEdit} onDelete={handleDelete} />
                 </div>
 
-                <div style={{
-                    padding: '16px',
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    borderBottom: '1px solid var(--gray-200)',
-                    color: 'var(--gray-500)'
-                }}>
-                    <button className="flex items-center gap-2 hover-blue-text transition">
-                        <MessageCircle size={20} />
-                    </button>
-                    <button className="flex items-center gap-2 hover-red-text transition">
-                        <Heart size={20} />
-                    </button>
-                    <button className="flex items-center gap-2 hover-green-text transition">
-                        <Share size={20} />
-                    </button>
-                    <button className="flex items-center gap-2 hover-blue-text transition">
-                        <Bookmark size={20} />
-                    </button>
-                </div>
-
                 {/* Reply Section Placeholder */}
                 <div style={{ padding: '16px', display: 'flex', gap: '12px', borderBottom: '1px solid var(--gray-200)' }}>
                     <div className="avatar" style={{
@@ -173,10 +152,7 @@ const PostDetailPage = () => {
             </div>
 
             <style>{`
-                .hover-blue-text:hover { color: var(--blue); }
-                .hover-red-text:hover { color: #F4212E; }
-                .hover-green-text:hover { color: #00BA7C; }
-                .transition { transition: all 0.2s ease; }
+                /* Additional detail page styles can go here */
             `}</style>
         </div>
     );

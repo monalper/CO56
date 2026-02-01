@@ -365,7 +365,7 @@ const RightSidebar = () => {
                 }
                 .widget-title {
                     font-size: 20px;
-                    font-weight: 800;
+                    font-weight: 600;
                     margin-bottom: 12px;
                 }
                 .mini-spinner {

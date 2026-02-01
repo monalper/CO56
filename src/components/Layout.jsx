@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, ScrollRestoration } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import RightSidebar from './RightSidebar';
 import Header from './Header';
@@ -24,16 +24,15 @@ const Layout = () => {
         };
 
         fetchProfile();
-
-        // Optional: Listen for profile changes if needed, 
-        // but for now simple fetch on mount is fine.
     }, []);
 
     const isActive = (path) => location.pathname === path;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <ScrollRestoration />
             <Header />
+
             <div className="main-layout">
                 <header className="sidebar-wrapper">
                     <Sidebar />

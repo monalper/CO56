@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/PostCard';
 import { Search, X } from 'lucide-react';
+import EndOfFeed from '../components/EndOfFeed';
 
 const AccountCard = ({ profile }) => {
     return (
@@ -291,7 +292,10 @@ const SearchPage = () => {
                     <div>
                         {activeTab === 'posts' ? (
                             posts.length > 0 ? (
-                                posts.map(post => <PostCard key={post.id} post={post} />)
+                                <>
+                                    {posts.map(post => <PostCard key={post.id} post={post} />)}
+                                    <EndOfFeed />
+                                </>
                             ) : (
                                 <div style={{ padding: '40px 20px', textAlign: 'center' }}>
                                     <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Sonuç bulunamadı</div>

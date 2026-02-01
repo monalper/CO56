@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { formatDate } from '../lib/utils';
 import { LinkifiedText } from './LinkifiedText';
-import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal, Flag, UserX } from 'lucide-react';
+import { Trash2, Edit, X, ChevronLeft, ChevronRight, MoreHorizontal, Flag, UserX, MessageCircle, Heart, HeartCrack, Bookmark } from 'lucide-react';
 
 const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
     const navigate = useNavigate();
@@ -25,7 +25,6 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
 
     const isOurPost = currentUserId === user_id;
 
-    // Internal actions
     const internalEdit = (e) => {
         e.stopPropagation();
         setShowMenu(false);
@@ -55,7 +54,6 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
         }
     };
 
-    // Placeholder actions
     const handleReport = (e) => {
         e.stopPropagation();
         setShowMenu(false);
@@ -68,21 +66,16 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
         alert('Bu kullanıcı engellendi.');
     };
 
-    // Dynamic Aspect Ratio State
     const [aspectRatio, setAspectRatio] = useState('3/4');
-
-    // Lightbox State
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Navigation helper
     const goToDetail = (e) => {
         if (isDetailView) return;
         const username = profiles?.username || 'user';
         navigate(`/@${username}/status/${postId}`);
     };
 
-    // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -114,7 +107,8 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
         }
     }, [content]);
 
-    const openLightbox = (index) => {
+    const openLightbox = (e, index) => {
+        if (e) e.stopPropagation();
         setCurrentImageIndex(index);
         setLightboxOpen(true);
         document.body.style.overflow = 'hidden';
@@ -176,14 +170,19 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                         }} />
                     </div>
 
-                    <div className="flex-col" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={(e) => {
-                        e.stopPropagation();
-                        if (profiles?.username) navigate(`/@${profiles.username}`);
-                    }}>
-                        <span style={{ fontWeight: '600', lineHeight: '1.2' }}>{profiles?.display_name || 'User'}</span>
-                        <span className="text-gray" style={{ fontSize: '0.85rem', lineHeight: '1.2', marginTop: '2px' }}>
-                            {dateFormatted}{location && `, ${location}`}
-                        </span>
+                    <div className="flex-col" style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                            style={{ cursor: 'pointer', width: 'fit-content' }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (profiles?.username) navigate(`/@${profiles.username}`);
+                            }}
+                        >
+                            <span style={{ fontWeight: '600', lineHeight: '1.2', display: 'block' }}>{profiles?.display_name || 'User'}</span>
+                            <span className="text-gray" style={{ fontSize: '0.85rem', lineHeight: '1.2', marginTop: '2px', display: 'block' }}>
+                                {dateFormatted}{location && `, ${location}`}
+                            </span>
+                        </div>
                     </div>
 
                     <div style={{ position: 'relative' }} ref={menuRef}>
@@ -193,7 +192,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                 setShowMenu(!showMenu);
                             }}
                             style={{
-                                color: 'var(--gray-500)',
+                                color: 'var(--gray-400)',
                                 padding: '8px',
                                 borderRadius: '50%',
                                 display: 'flex',
@@ -203,7 +202,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                             }}
                             className="hover-gray"
                         >
-                            < MoreHorizontal size={18} />
+                            <MoreHorizontal size={18} />
                         </button>
 
                         {showMenu && (
@@ -312,7 +311,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                             borderRadius: '12px',
                                             cursor: 'pointer'
                                         }}
-                                        onClick={() => openLightbox(index)}
+                                        onClick={(e) => openLightbox(e, index)}
                                     >
                                         <img src={img.image_url} alt="Post attachment" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
@@ -328,6 +327,51 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                             )}
                         </div>
                     )}
+
+                    {/* Interaction Icons - Waypoint ve Share Kaldırıldı */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        gap: '24px',
+                        marginTop: '12px',
+                        color: '#71767b',
+                        paddingRight: '12px'
+                    }}>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); }}
+                            title="Beğen"
+                            style={{ padding: '8px', marginLeft: '-8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                        >
+                            <Heart size={20} />
+                        </button>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); }}
+                            title="Beğenme"
+                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                        >
+                            <HeartCrack size={20} />
+                        </button>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/@${profiles?.username}/status/${postId}`);
+                            }}
+                            title="Yanıtla"
+                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                        >
+                            <MessageCircle size={18} />
+                        </button>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); }}
+                            title="Kaydet"
+                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                        >
+                            <Bookmark size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

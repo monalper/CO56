@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/PostCard';
+import EndOfFeed from '../components/EndOfFeed';
 
 
 const Home = () => {
@@ -68,9 +69,12 @@ const Home = () => {
                 ) : posts.length === 0 ? (
                     <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Henüz paylaşım yok.</p>
                 ) : (
-                    posts.map(post => (
-                        <PostCard key={post.id} post={post} />
-                    ))
+                    <>
+                        {posts.map(post => (
+                            <PostCard key={post.id} post={post} />
+                        ))}
+                        <EndOfFeed />
+                    </>
                 )}
             </div>
         </div>

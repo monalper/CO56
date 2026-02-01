@@ -251,8 +251,8 @@ const Header = () => {
                 }
 
                 .nav-avatar-wrapper {
-                    width: 30px;
-                    height: 30px;
+                    width: 25px;
+                    height: 25px;
                     border-radius: 50%;
                     overflow: hidden;
                 }

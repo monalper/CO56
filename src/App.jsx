@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  createRoutesFromElements,
+  Route,
+  Navigate
+} from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -44,48 +50,47 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route
+          path="/admin/dash"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/profile" element={<UserProfiles />} />
+        <Route path="/:username" element={<UserProfiles />} />
+        <Route path="/:username/status/:postId" element={<PostDetailPage />} />
+        <Route path="/create" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
+        <Route path="/edit/:postId" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
+        <Route path="/settings" element={<Settings />} />
+
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/accessibility" element={<AccessibilityPage />} />
+        <Route path="/ads-info" element={<AdsInfoPage />} />
+      </Route>
+
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+
+      <Route path="*" element={<NotFoundPage />} />
+    </>
+  )
+);
+
 function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Layout Wrapper for main pages */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route
-            path="/admin/dash"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          {/* Profile Routes */}
-          <Route path="/profile" element={<UserProfiles />} />
-          <Route path="/:username" element={<UserProfiles />} />
-          <Route path="/:username/status/:postId" element={<PostDetailPage />} />
-          <Route path="/create" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
-          <Route path="/edit/:postId" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
-          <Route path="/settings" element={<Settings />} />
-
-          {/* Static Pages */}
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/cookies" element={<CookiesPage />} />
-          <Route path="/accessibility" element={<AccessibilityPage />} />
-          <Route path="/ads-info" element={<AdsInfoPage />} />
-        </Route>
-
-        {/* Standalone Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Router>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
+
