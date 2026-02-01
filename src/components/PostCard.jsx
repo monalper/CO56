@@ -12,6 +12,10 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [voteScore, setVoteScore] = useState(0);
+    const [userVote, setUserVote] = useState(null);
+    const [commentCount, setCommentCount] = useState(0);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const textRef = useRef(null);
     const menuRef = useRef(null);
 
@@ -22,6 +26,133 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
         };
         getSession();
     }, []);
+
+    useEffect(() => {
+        if (!postId) return;
+
+        const fetchVoteData = async () => {
+            if (currentUserId) {
+                const { data } = await supabase
+                    .from('post_votes')
+                    .select('vote_type')
+                    .eq('post_id', postId)
+                    .eq('user_id', currentUserId)
+                    .single();
+                if (data) setUserVote(data.vote_type);
+
+                // Check bookmark status
+                const { data: bookmarkData } = await supabase
+                    .from('bookmarks')
+                    .select('id')
+                    .eq('post_id', postId)
+                    .eq('user_id', currentUserId)
+                    .single();
+                setIsBookmarked(!!bookmarkData);
+            }
+
+            const { count: likeCount } = await supabase
+                .from('post_votes')
+                .select('*', { count: 'exact', head: true })
+                .eq('post_id', postId)
+                .eq('vote_type', 'like');
+
+            const { count: dislikeCount } = await supabase
+                .from('post_votes')
+                .select('*', { count: 'exact', head: true })
+                .eq('post_id', postId)
+                .eq('vote_type', 'dislike');
+
+            setVoteScore((likeCount || 0) - (dislikeCount || 0));
+
+            // Fetch Comment Count
+            const { count: comments } = await supabase
+                .from('comments')
+                .select('*', { count: 'exact', head: true })
+                .eq('post_id', postId);
+
+            setCommentCount(comments || 0);
+        };
+
+        fetchVoteData();
+    }, [postId, currentUserId]);
+
+    const handleVote = async (type) => {
+        if (!currentUserId) {
+            alert('Lütfen oy kullanmak için giriş yapın.');
+            return;
+        }
+
+        const previousVote = userVote;
+        const previousScore = voteScore;
+
+        let newVote = type;
+        let newScore = voteScore;
+
+        if (previousVote === type) {
+            newVote = null;
+            if (type === 'like') newScore -= 1;
+            else newScore += 1;
+        } else {
+            if (previousVote) {
+                if (type === 'like') newScore += 2;
+                else newScore -= 2;
+            } else {
+                if (type === 'like') newScore += 1;
+                else newScore -= 1;
+            }
+        }
+
+        setUserVote(newVote);
+        setVoteScore(newScore);
+
+        try {
+            if (newVote === null) {
+                const { error } = await supabase.from('post_votes').delete().eq('post_id', postId).eq('user_id', currentUserId);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('post_votes').upsert({
+                    post_id: postId,
+                    user_id: currentUserId,
+                    vote_type: newVote
+                }, { onConflict: 'user_id, post_id' });
+                if (error) throw error;
+            }
+        } catch (error) {
+            console.error('Vote error:', error);
+            setUserVote(previousVote);
+            setVoteScore(previousScore);
+        }
+    };
+
+    const handleBookmark = async (e) => {
+        e.stopPropagation();
+        if (!currentUserId) {
+            alert('Lütfen favorilere eklemek için giriş yapın.');
+            return;
+        }
+
+        const newStatus = !isBookmarked;
+        setIsBookmarked(newStatus); // Optimistic update
+
+        try {
+            if (newStatus) {
+                const { error } = await supabase
+                    .from('bookmarks')
+                    .insert({ user_id: currentUserId, post_id: postId });
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('bookmarks')
+                    .delete()
+                    .eq('user_id', currentUserId)
+                    .eq('post_id', postId);
+                if (error) throw error;
+            }
+        } catch (error) {
+            console.error('Bookmark error:', error);
+            setIsBookmarked(!newStatus); // Revert
+        }
+    };
 
     const isOurPost = currentUserId === user_id;
 
@@ -338,19 +469,55 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                         paddingRight: '12px'
                     }}>
                         <button
-                            onClick={(e) => { e.stopPropagation(); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleVote('like');
+                            }}
                             title="Beğen"
-                            style={{ padding: '8px', marginLeft: '-8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                            style={{
+                                padding: '8px',
+                                marginLeft: '-8px',
+                                background: 'transparent',
+                                border: 'none',
+                                color: userVote === 'like' ? '#F91880' : 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'color 0.2s'
+                            }}
                         >
-                            <Heart size={20} />
+                            <Heart size={20} fill={userVote === 'like' ? 'currentColor' : 'none'} />
                         </button>
 
+                        <span style={{
+                            fontSize: '14px',
+                            color: '#71767b',
+                            minWidth: '20px',
+                            textAlign: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: Math.abs(voteScore) > 0 ? '600' : '400'
+                        }}>
+                            {voteScore}
+                        </span>
+
                         <button
-                            onClick={(e) => { e.stopPropagation(); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleVote('dislike');
+                            }}
                             title="Beğenme"
-                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                            style={{
+                                padding: '8px',
+                                background: 'transparent',
+                                border: 'none',
+                                color: userVote === 'dislike' ? '#1D9BF0' : 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'color 0.2s'
+                            }}
                         >
-                            <HeartCrack size={20} />
+                            <HeartCrack size={20} fill={userVote === 'dislike' ? 'currentColor' : 'none'} />
                         </button>
 
                         <button
@@ -359,17 +526,26 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                 navigate(`/@${profiles?.username}/status/${postId}`);
                             }}
                             title="Reply"
-                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '4px' }}
                         >
                             <MessageCircle size={18} />
+                            {commentCount > 0 && <span style={{ fontSize: '14px', lineHeight: 1 }}>{commentCount}</span>}
                         </button>
 
                         <button
-                            onClick={(e) => { e.stopPropagation(); }}
+                            onClick={handleBookmark}
                             title="Save"
-                            style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                            style={{
+                                padding: '8px',
+                                background: 'transparent',
+                                border: 'none',
+                                color: isBookmarked ? '#1D9BF0' : 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'color 0.2s'
+                            }}
                         >
-                            <Bookmark size={20} />
+                            <Bookmark size={20} fill={isBookmarked ? 'currentColor' : 'none'} />
                         </button>
                     </div>
                 </div>

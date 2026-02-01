@@ -1,29 +1,174 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
 import { LinkifiedText } from './LinkifiedText';
 
 // --- Components ---
 
-// 2. Who To Follow Widget
+// 2. Who To Follow Widget Items
+const WhoToFollowItem = ({ profile, currentUser }) => {
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (currentUser) {
+            checkStatus();
+        }
+    }, [currentUser, profile]);
+
+    const checkStatus = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('follows')
+                .select('*')
+                .eq('follower_id', currentUser.id)
+                .eq('following_id', profile.id)
+                .maybeSingle();
+
+            if (!error && data) {
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            console.error('Check follow status error:', error);
+        }
+    };
+
+    const handleFollow = async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (!currentUser) return navigate('/login');
+
+        try {
+            if (isFollowing) {
+                // Unfollow
+                const { error } = await supabase
+                    .from('follows')
+                    .delete()
+                    .eq('follower_id', currentUser.id)
+                    .eq('following_id', profile.id);
+
+                if (error) throw error;
+                setIsFollowing(false);
+            } else {
+                // Follow
+                const { error } = await supabase
+                    .from('follows')
+                    .insert([{ follower_id: currentUser.id, following_id: profile.id }]);
+
+                if (error) throw error;
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            console.error('Handle follow error:', error);
+            if (error.code === '42P01') {
+                alert('Hata: "follows" tablosu bulunamadı.');
+            } else if (error.code === '23505') {
+                // Already following
+                setIsFollowing(true);
+            }
+        }
+    };
+
+    return (
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px'
+            }}
+        >
+            <Link
+                to={`/@${profile.username}`}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flex: 1,
+                    overflow: 'hidden',
+                    textDecoration: 'none',
+                    color: 'inherit'
+                }}
+            >
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#eee',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                }}>
+                    <img
+                        src={profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.display_name}&background=f3f4f6&color=6b7280`}
+                        alt={profile.display_name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <span
+                        className="hover-underline"
+                        style={{
+                            fontWeight: '700',
+                            fontSize: '15px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                        }}
+                    >
+                        {profile.display_name}
+                    </span>
+                    <span style={{ color: '#536471', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        @{profile.username}
+                    </span>
+                </div>
+            </Link>
+            <button
+                onClick={handleFollow}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                style={{
+                    backgroundColor: isFollowing ? (isHovering ? '#ef444400' : '#fff') : '#0f1419',
+                    color: isFollowing ? (isHovering ? '#ef4444' : '#0f1419') : '#fff',
+                    border: isFollowing ? `1px solid ${isHovering ? '#ef4444' : '#cfd9de'}` : 'none',
+                    padding: '6px 16px',
+                    borderRadius: '9999px',
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    minWidth: '100px',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                }}
+            >
+                {isFollowing ? (isHovering ? 'Takibi Bırak' : 'Takip Ediliyor') : 'Takip Et'}
+            </button>
+        </div>
+    );
+};
+
+// Who To Follow Widget
 const WhoToFollow = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const { data: { user: currentUser } } = await supabase.auth.getUser();
+                const { data: { user } } = await supabase.auth.getUser();
+                setCurrentUser(user);
 
                 let query = supabase.from('profiles').select('*').limit(3);
-                if (currentUser) {
-                    query = query.neq('id', currentUser.id);
+                if (user) {
+                    query = query.neq('id', user.id);
                 }
 
                 const { data, error } = await query;
                 if (error) throw error;
+
                 setUsers(data || []);
             } catch (err) {
                 console.error("Error fetching users for follow widget:", err);
@@ -52,79 +197,7 @@ const WhoToFollow = () => {
             <h3 className="widget-title">Who to follow</h3>
             <div className="flex-col" style={{ gap: '16px' }}>
                 {users.map((profile) => (
-                    <div
-                        key={profile.id}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '12px'
-                        }}
-                    >
-                        <Link
-                            to={`/@${profile.username}`}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                flex: 1,
-                                overflow: 'hidden',
-                                textDecoration: 'none',
-                                color: 'inherit'
-                            }}
-                        >
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                backgroundColor: '#eee',
-                                overflow: 'hidden',
-                                flexShrink: 0
-                            }}>
-                                <img
-                                    src={profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.display_name}&background=f3f4f6&color=6b7280`}
-                                    alt={profile.display_name}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                <span
-                                    className="hover-underline"
-                                    style={{
-                                        fontWeight: '700',
-                                        fontSize: '15px',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                    }}
-                                >
-                                    {profile.display_name}
-                                </span>
-                                <span style={{ color: '#536471', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    @{profile.username}
-                                </span>
-                            </div>
-                        </Link>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                navigate(`/@${profile.username}`);
-                            }}
-                            style={{
-                                backgroundColor: '#0f1419',
-                                color: 'white',
-                                border: 'none',
-                                padding: '6px 16px',
-                                borderRadius: '9999px',
-                                fontWeight: '700',
-                                fontSize: '14px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Follow
-                        </button>
-                    </div>
+                    <WhoToFollowItem key={profile.id} profile={profile} currentUser={currentUser} />
                 ))}
             </div>
             <Link
@@ -159,6 +232,10 @@ const ProfileInfoWidget = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const navigate = useNavigate();
 
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isHoveringFollow, setIsHoveringFollow] = useState(false);
+    const [stats, setStats] = useState({ following: 0, followers: 0, votes: 0 });
+
     const username = rawUsername?.startsWith('@') ? rawUsername.substring(1) : (rawUsername === 'profile' ? null : rawUsername);
 
     useEffect(() => {
@@ -176,6 +253,56 @@ const ProfileInfoWidget = () => {
         }
         fetchProfile();
     }, [username, rawUsername]);
+
+    useEffect(() => {
+        if (currentUser && profile && currentUser.id !== profile.id) {
+            checkFollowStatus(currentUser.id, profile.id);
+        }
+
+        if (profile) {
+            const fetchStats = async () => {
+                // Followers
+                const { count: followers } = await supabase
+                    .from('follows')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('following_id', profile.id);
+
+                // Following
+                const { count: following } = await supabase
+                    .from('follows')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('follower_id', profile.id);
+
+                // Votes
+                const { data: userPosts } = await supabase
+                    .from('posts')
+                    .select('id')
+                    .eq('user_id', profile.id);
+
+                let voteScore = 0;
+                if (userPosts && userPosts.length > 0) {
+                    const postIds = userPosts.map(p => p.id);
+
+                    const { count: likes } = await supabase
+                        .from('post_votes')
+                        .select('*', { count: 'exact', head: true })
+                        .in('post_id', postIds)
+                        .eq('vote_type', 'like');
+
+                    const { count: dislikes } = await supabase
+                        .from('post_votes')
+                        .select('*', { count: 'exact', head: true })
+                        .in('post_id', postIds)
+                        .eq('vote_type', 'dislike');
+
+                    voteScore = (likes || 0) - (dislikes || 0);
+                }
+
+                setStats({ following: following || 0, followers: followers || 0, votes: voteScore });
+            };
+            fetchStats();
+        }
+    }, [currentUser, profile]);
 
     const fetchProfile = async () => {
         setLoading(true);
@@ -199,6 +326,60 @@ const ProfileInfoWidget = () => {
             console.error("Error fetching profile for sidebar:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkFollowStatus = async (followerId, followingId) => {
+        try {
+            const { data, error } = await supabase
+                .from('follows')
+                .select('*')
+                .eq('follower_id', followerId)
+                .eq('following_id', followingId)
+                .maybeSingle();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Check follow error:', error);
+            }
+
+            setIsFollowing(!!data);
+        } catch (error) {
+            console.error('Check follow error:', error);
+        }
+    };
+
+    const handleFollow = async () => {
+        if (!currentUser) return navigate('/login');
+
+        try {
+            if (isFollowing) {
+                // Unfollow
+                const { error } = await supabase
+                    .from('follows')
+                    .delete()
+                    .eq('follower_id', currentUser.id)
+                    .eq('following_id', profile.id);
+
+                if (error) throw error;
+                setIsFollowing(false);
+            } else {
+                // Follow
+                const { error } = await supabase
+                    .from('follows')
+                    .insert([{ follower_id: currentUser.id, following_id: profile.id }]);
+
+                if (error) throw error;
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            console.error('Handle follow error:', error);
+            if (error.code === '42P01') {
+                alert('Hata: "follows" tablosu bulunamadı.');
+            } else if (error.code === '23505') {
+                setIsFollowing(true);
+            } else {
+                alert(`İşlem sırasında bir hata oluştu: ${error.message || error.code}`);
+            }
         }
     };
 
@@ -274,6 +455,21 @@ const ProfileInfoWidget = () => {
                         <Calendar size={18} />
                         <span>{formatDate(profile?.created_at)}</span>
                     </div>
+
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '4px', color: '#0f1419' }}>
+                        <div style={{ display: 'flex', gap: '4px', cursor: 'pointer' }} className="hover-underline">
+                            <span style={{ fontWeight: '700' }}>{stats.following}</span>
+                            <span style={{ color: '#536471' }}>Following</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px', cursor: 'pointer' }} className="hover-underline">
+                            <span style={{ fontWeight: '700' }}>{stats.followers}</span>
+                            <span style={{ color: '#536471' }}>Followers</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <span style={{ fontWeight: '700' }}>{stats.votes}</span>
+                            <span style={{ color: '#536471' }}>Vote Score</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div style={{ marginTop: '8px' }}>
@@ -295,18 +491,23 @@ const ProfileInfoWidget = () => {
                             Edit Profile
                         </button>
                     ) : (
-                        <button style={{
-                            width: '100%',
-                            padding: '10px',
-                            background: '#0f1419',
-                            color: '#fff',
-                            borderRadius: '9999px',
-                            fontWeight: '700',
-                            fontSize: '15px',
-                            border: 'none',
-                            cursor: 'pointer'
-                        }}>
-                            Follow
+                        <button
+                            onClick={handleFollow}
+                            onMouseEnter={() => setIsHoveringFollow(true)}
+                            onMouseLeave={() => setIsHoveringFollow(false)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                background: isFollowing ? (isHoveringFollow ? '#ef444400' : '#fff') : '#0f1419',
+                                color: isFollowing ? (isHoveringFollow ? '#ef4444' : '#0f1419') : '#fff',
+                                border: isFollowing ? `1px solid ${isHoveringFollow ? '#ef4444' : '#cfd9de'}` : 'none',
+                                borderRadius: '9999px',
+                                fontWeight: '700',
+                                fontSize: '15px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {isFollowing ? (isHoveringFollow ? 'Takibi Bırak' : 'Takip Ediliyor') : 'Takip Et'}
                         </button>
                     )}
                 </div>

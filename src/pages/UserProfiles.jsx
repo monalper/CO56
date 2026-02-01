@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import CommentCard from '../components/CommentCard';
 import { LinkifiedText } from '../components/LinkifiedText';
 import EndOfFeed from '../components/EndOfFeed';
 
@@ -10,8 +11,11 @@ const UserProfiles = () => {
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
+    const [userComments, setUserComments] = useState([]); // State for user comments
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isHoveringFollow, setIsHoveringFollow] = useState(false);
     const navigate = useNavigate();
     const { username: rawUsername } = useParams();
     const username = rawUsername?.startsWith('@') ? rawUsername.substring(1) : rawUsername;
@@ -19,6 +23,48 @@ const UserProfiles = () => {
     useEffect(() => {
         fetchProfileData();
     }, [username]);
+
+    // Fetch comments when switching to 'comments' tab
+    useEffect(() => {
+        if (activeTab === 'comments' && profile) {
+            fetchUserComments();
+        }
+    }, [activeTab, profile]);
+
+    const fetchUserComments = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('comments')
+                .select(`
+                    *,
+                    profiles (id, display_name, username, avatar_url),
+                    posts (
+                        id,
+                        content,
+                        profiles (username)
+                    )
+                `)
+                .eq('user_id', profile.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setUserComments(data || []);
+        } catch (err) {
+            console.error('Error fetching user comments:', err);
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+        try {
+            const { error } = await supabase.from('comments').delete().eq('id', commentId);
+            if (error) throw error;
+            // Remove locally
+            setUserComments(prev => prev.filter(c => c.id !== commentId));
+        } catch (err) {
+            alert('Silme hatası: ' + err.message);
+        }
+    };
 
     const fetchProfileData = async () => {
         setLoading(true);
@@ -76,10 +122,76 @@ const UserProfiles = () => {
 
             setUser(currentUser);
 
+            if (currentUser && profileData && currentUser.id !== profileData.id) {
+                checkFollowStatus(currentUser.id, profileData.id);
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkFollowStatus = async (followerId, followingId) => {
+        try {
+            const { data, error } = await supabase
+                .from('follows')
+                .select('*')
+                .eq('follower_id', followerId)
+                .eq('following_id', followingId)
+                .maybeSingle();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('Check follow error:', error);
+            }
+
+            setIsFollowing(!!data);
+        } catch (error) {
+            console.error('Check follow error:', error);
+        }
+    };
+
+    const handleFollow = async () => {
+        if (!user) return navigate('/login');
+
+        try {
+            console.log("Handle follow trigger. isFollowing:", isFollowing);
+            console.log("User:", user.id, "Profile:", profile.id);
+
+            if (isFollowing) {
+                // Unfollow
+                console.log("Attempting unfollow...");
+                const { error } = await supabase
+                    .from('follows')
+                    .delete()
+                    .eq('follower_id', user.id)
+                    .eq('following_id', profile.id);
+
+                if (error) throw error;
+                console.log("Unfollow success");
+                setIsFollowing(false);
+            } else {
+                // Follow
+                console.log("Attempting follow...");
+                const { error } = await supabase
+                    .from('follows')
+                    .insert([{ follower_id: user.id, following_id: profile.id }]);
+
+                if (error) throw error;
+                console.log("Follow success");
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            console.error('Handle follow error:', error);
+            if (error.code === '42P01') {
+                alert('Hata: "follows" tablosu bulunamadı. Lütfen Supabase SQL editöründe gerekli tabloyu oluşturduğunuzdan emin olun.');
+            } else if (error.code === '23505') {
+                // Unique violation, means already following, just sync state
+                setIsFollowing(true);
+            } else {
+                alert(`İşlem sırasında bir hata oluştu: ${error.message || error.code}`);
+            }
         }
     };
 
@@ -118,7 +230,7 @@ const UserProfiles = () => {
             <div className="mobile-only" style={{ padding: '0 1rem 1rem 1rem', position: 'relative' }}>
 
                 {/* Mobile Cover Image */}
-                <div style={{ width: '100%', height: '140px', backgroundColor: '#cfd9de', margin: '0 -1rem', width: 'calc(100% + 2rem)' }}>
+                <div style={{ height: '140px', backgroundColor: '#cfd9de', margin: '0 -1rem', width: 'calc(100% + 2rem)' }}>
                     {profile.cover_url ? (
                         <img
                             src={profile.cover_url}
@@ -131,7 +243,7 @@ const UserProfiles = () => {
                 </div>
 
                 {/* Avatar + Edit/Follow Button Row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-10%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-60px', padding: '0 10px', position: 'relative', zIndex: 10 }}>
                     {/* Avatar */}
                     <div style={{ padding: '4px', background: '#fff', borderRadius: '50%' }}>
                         <div style={{ width: '134px', height: '134px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#eee' }}>
@@ -154,14 +266,26 @@ const UserProfiles = () => {
                                 }}
                                 className="hover-bg-dark"
                             >
-                                Edit Profile
+                                Profili Düzenle
                             </button>
                         ) : (
-                            <button style={{
-                                padding: '0.5rem 1.5rem', background: '#0f1419', color: '#fff',
-                                borderRadius: '9999px', fontWeight: '700', fontSize: '15px', border: 'none', cursor: 'pointer'
-                            }}>
-                                Follow
+                            <button
+                                onClick={handleFollow}
+                                onMouseEnter={() => setIsHoveringFollow(true)}
+                                onMouseLeave={() => setIsHoveringFollow(false)}
+                                style={{
+                                    padding: '0.5rem 1.5rem',
+                                    background: isFollowing ? (isHoveringFollow ? '#ef444400' : '#fff') : '#0f1419',
+                                    color: isFollowing ? (isHoveringFollow ? '#ef4444' : '#0f1419') : '#fff',
+                                    border: isFollowing ? `1px solid ${isHoveringFollow ? '#ef4444' : '#cfd9de'}` : 'none',
+                                    borderRadius: '9999px',
+                                    fontWeight: '700',
+                                    fontSize: '15px',
+                                    cursor: 'pointer',
+                                    minWidth: '120px'
+                                }}
+                            >
+                                {isFollowing ? (isHoveringFollow ? 'Takibi Bırak' : 'Takip Ediliyor') : 'Takip Et'}
                             </button>
                         )}
                     </div>
@@ -249,17 +373,34 @@ const UserProfiles = () => {
 
             {/* 4. Feed */}
             <div style={{ minHeight: '200px' }}>
-                {posts.length > 0 ? (
+                {posts.length > 0 || userComments.length > 0 ? (
                     <div>
                         {activeTab === 'posts' && (
                             <>
-                                {posts.map(post => (
+                                {posts.length > 0 ? posts.map(post => (
                                     <PostCard key={post.id} post={post} />
-                                ))}
-                                <EndOfFeed />
+                                )) : (
+                                    <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
+                                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No posts yet</span>
+                                        <span style={{ fontSize: '0.9rem' }}>Shared posts will appear here.</span>
+                                    </div>
+                                )}
+                                {posts.length > 0 && <EndOfFeed />}
                             </>
                         )}
-                        {activeTab !== 'posts' && (
+                        {activeTab === 'comments' && (
+                            <>
+                                {userComments.length > 0 ? userComments.map(comment => (
+                                    <CommentCard key={comment.id} comment={comment} onDelete={handleDeleteComment} />
+                                )) : (
+                                    <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
+                                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No comments yet</span>
+                                        <span style={{ fontSize: '0.9rem' }}>Comments made by this user will appear here.</span>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                        {activeTab !== 'posts' && activeTab !== 'comments' && (
                             <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
                                 <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No content yet</span>
                                 <span style={{ fontSize: '0.9rem' }}>This feature will be added soon.</span>
@@ -268,8 +409,7 @@ const UserProfiles = () => {
                     </div>
                 ) : (
                     <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
-                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No posts yet</span>
-                        <span style={{ fontSize: '0.9rem' }}>Shared posts will appear here.</span>
+                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No content yet</span>
                     </div>
                 )}
             </div>

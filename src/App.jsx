@@ -18,6 +18,7 @@ import CreatePostPage from './pages/CreatePostPage';
 import PostDetailPage from './pages/PostDetailPage';
 import Layout from './components/Layout';
 
+import BookmarksPage from './pages/BookmarksPage';
 import { TermsPage, PrivacyPage, CookiesPage, AccessibilityPage, AdsInfoPage } from './pages/StaticPages';
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
@@ -70,6 +71,7 @@ const router = createBrowserRouter(
         <Route path="/create" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
         <Route path="/edit/:postId" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/bookmarks" element={<ProtectedRoute><BookmarksPage /></ProtectedRoute>} />
 
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
