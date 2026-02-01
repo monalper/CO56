@@ -37,7 +37,7 @@ const CreatePostPage = () => {
                 if (!error && data) {
                     // Check if post belongs to current user
                     if (data.user_id !== session.user.id) {
-                        alert('Bu gönderiyi düzenleme yetkiniz yok.');
+                        alert('You are not authorized to edit this post.');
                         navigate('/');
                         return;
                     }
@@ -84,7 +84,9 @@ const CreatePostPage = () => {
                 >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 </button>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>{postId ? 'Gönderiyi Düzenle' : 'Paylaşım Yap'}</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>
+                    {postId ? 'Edit Post' : 'Create Post'}
+                </h2>
             </div>
 
             <div style={{ padding: '16px' }}>

@@ -80,19 +80,19 @@ const StaticPage = ({ title, content }) => {
 
 export const TermsPage = () => (
     <StaticPage
-        title="Hizmet Şartları"
+        title="Terms and Conditions"
         content={
             <>
-                <p>CO56 platformuna hoş geldiniz. Bu hizmet şartları, platformumuzu kullanımınızı ve sunduğumuz hizmetlerle etkileşiminizi düzenleyen kapsamlı bir yasal sözleşmedir.</p>
+                <p>Welcome to CO56 platform. These Terms and Conditions are a comprehensive legal agreement that regulates your use of our platform and the services we provide.</p>
 
-                <h3>1. Şartların Kabulü</h3>
-                <p>Hizmetlerimize erişerek veya bunları kullanarak, bu Kullanım Şartları’nın tamamını okuduğunuzu, anladığınızı ve bunlara bağlı kalmayı kabul ettiğinizi beyan edersiniz. Eğer bu şartları kabul etmiyorsanız, lütfen hizmetlerimizi kullanmayın.</p>
+                <h3>1. Acceptance of Terms</h3>
+                <p>By accessing or using our services, you agree to accept and be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services.</p>
 
-                <h3>2. Kullanıcı Sorumluluğu</h3>
-                <p>Platformumuzda paylaştığınız tüm içeriklerden siz sorumlusunuz. Topluluğumuzun güvenliğini korumak adına diğer kullanıcıları taciz etmek, yasa dışı içerik paylaşmak veya platform altyapısını kötüye kullanmak kesinlikle yasaktır.</p>
+                <h3>2. User Responsibility</h3>
+                <p>You are responsible for all content you share on our platform. It is strictly prohibited to harass other users, share illegal content, or use our platform infrastructure for malicious purposes.</p>
 
-                <h3>3. İçerik Hakları</h3>
-                <p>Paylaştığınız içeriklerin mülkiyeti size aittir; ancak platforma yükleyerek bize bu içerikleri yayınlama, barındırma ve dağıtma hakkı veren dünya çapında geçerli bir lisans vermiş olursunuz.</p>
+                <h3>3. Content Rights</h3>
+                <p>You own the content you share on our platform; however, by uploading it to us, you grant us a worldwide, perpetual, irrevocable, royalty-free license to publish, host, and distribute the content.</p>
             </>
         }
     />
@@ -100,19 +100,19 @@ export const TermsPage = () => (
 
 export const PrivacyPage = () => (
     <StaticPage
-        title="Gizlilik Politikası"
+        title="Privacy Policy"
         content={
             <>
-                <p>Gizliliğiniz bizim için en öncelikli konudur. Bu politikada hangi verileri topladığımızı, bu verileri nasıl işlediğimizi ve güvenliğinizi nasıl sağladığımızı detaylandırıyoruz.</p>
+                <p>Privacy is our top priority. This policy details what data we collect, how we process it, and how we protect your security.</p>
 
-                <h3>1. Toplanan Bilgiler</h3>
-                <p>Hesap oluştururken sağladığınız e-posta adresi, kullanıcı adı ve profil bilgilerinin yanı sıra, platform üzerindeki etkileşimleriniz (paylaşımlar, beğeniler) sistemlerimizde güvenli bir şekilde saklanır.</p>
+                <h3>1. Collected Information</h3>
+                <p>When you create an account, we collect your email address, username, and profile information, as well as your interactions on the platform (shares, likes) which are securely stored in our systems.</p>
 
-                <h3>2. Veri Kullanımı</h3>
-                <p>Verilerinizi size daha kişiselleştirilmiş bir deneyim sunmak, platform güvenliğini optimize etmek ve teknik sorunları hızlıca çözüme kavuşturmak amacıyla kullanıyoruz.</p>
+                <h3>2. Data Usage</h3>
+                <p>We use your data to provide you with a personalized experience, optimize platform security, and quickly resolve technical issues.</p>
 
-                <h3>3. Üçüncü Taraflar</h3>
-                <p>Kişisel verileriniz, açık rızanız olmaksızın veya yasal bir zorunluluk bulunmadığı sürece reklamverenler veya diğer üçüncü taraf kuruluşlarla paylaşılmaz.</p>
+                <h3>3. Third Parties</h3>
+                <p>Your personal data is not shared with advertisers or other third-party organizations without your explicit consent or unless required by law.</p>
             </>
         }
     />
@@ -120,19 +120,19 @@ export const PrivacyPage = () => (
 
 export const CookiesPage = () => (
     <StaticPage
-        title="Çerez Politikası"
+        title="Cookie Policy"
         content={
             <>
-                <p>CO56, kullanıcı deneyimini zenginleştirmek ve site trafiğini analiz etmek için çerezleri ve benzeri takip teknolojilerini kullanır.</p>
+                <p>CO56 uses cookies and similar tracking technologies to enhance user experience and analyze website traffic.</p>
 
-                <h3>Çerez Nedir?</h3>
-                <p>Çerezler, web sitemize girdiğinizde tarayıcınıza yerleştirilen ve sizi hatırlamamıza yardımcı olan küçük metin dosyalarıdır.</p>
+                <h3>What are Cookies?</h3>
+                <p>Cookies are small text files placed in your browser when you visit our website to help us remember you and improve your experience.</p>
 
-                <h3>Neden Çerez Kullanıyoruz?</h3>
+                <h3>Why Do We Use Cookies?</h3>
                 <ul>
-                    <li>Sizi tanımak ve her seferinde giriş yapma zorunluluğunu ortadan kaldırmak.</li>
-                    <li>Dil ve tema gibi kişisel tercihlerinizi hatırlamak.</li>
-                    <li>Site trafiğini analiz ederek platform performansını iyileştirmek.</li>
+                    <li>To identify you and eliminate the need for login on every visit.</li>
+                    <li>To remember your language and theme preferences.</li>
+                    <li>To analyze website traffic and improve platform performance.</li>
                 </ul>
             </>
         }
@@ -141,11 +141,11 @@ export const CookiesPage = () => (
 
 export const AccessibilityPage = () => (
     <StaticPage
-        title="Erişilebilirlik"
+        title="Accessibility"
         content={
             <>
-                <p>Herkesin CO56'yı kısıtlama olmaksızın, rahatça kullanabilmesini amaçlıyoruz. Dijital dünyada engelleri kaldırmak önceliğimizdir.</p>
-                <p>Platformumuzu dünya çapında kabul görmüş <strong>Web İçeriği Erişilebilirlik Standartlarına (WCAG)</strong> uyumlu hale getirmek için sürekli çalışıyoruz. Ekran okuyucu desteği, klavye ile navigasyon ve yüksek renk kontrastı konularında düzenli iyileştirmeler yapıyoruz.</p>
+                <p>We strive to make CO56 accessible to everyone without any limitations, ensuring a comfortable experience. Our priority is to remove barriers in the digital world.</p>
+                <p>We continuously work to make our platform WCAG (Web Content Accessibility Guidelines) compliant worldwide. We make regular improvements in features such as screen reader support, keyboard navigation, and high contrast.</p>
             </>
         }
     />
@@ -153,11 +153,11 @@ export const AccessibilityPage = () => (
 
 export const AdsInfoPage = () => (
     <StaticPage
-        title="Reklam Bilgisi"
+        title="Ads Information"
         content={
             <>
-                <p>Platformumuzun tamamen ücretsiz kalmasını sağlamak amacıyla belirli alanlarda reklam gösterimleri yapılabilir.</p>
-                <p>Reklamlar ilgi alanlarınıza göre özelleştirilebilir; ancak bu süreçte kimliğinizi doğrudan açık edecek hiçbir veri (isim, e-posta vb.) reklamverenlerle paylaşılmaz. Reklam modelimiz, gizlilikten ödün vermeden sürdürülebilir bir hizmet sunmayı amaçlar.</p>
+                <p>Our platform can display advertisements in certain areas to ensure it remains free of charge.</p>
+                <p>Ads can be customized based on your interests; however, no personal information (name, email, etc.) is shared with advertisers during this process. Our ad model aims to provide a sustainable service without compromising privacy.</p>
             </>
         }
     />

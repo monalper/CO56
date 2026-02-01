@@ -68,7 +68,7 @@ const SearchBox = () => {
 
             <input
                 type="text"
-                placeholder={useProfileFilter ? "Profilde ara" : "Ara"}
+                placeholder={useProfileFilter ? "Search in profile" : "Search"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="header-search-input"
@@ -128,11 +128,11 @@ const Header = () => {
                 <div className="header-right">
                     {session ? (
                         <div className="nav-group">
-                            <button className="nav-icon-link" title="Mesajlar">
+                            <button className="nav-icon-link" title="Messages">
                                 <MessageCircle size={22} strokeWidth={1.75} />
                             </button>
 
-                            <Link to="/create" className="nav-icon-link" title="Oluştur">
+                            <Link to="/create" className="nav-icon-link" title="Create">
                                 <CirclePlus size={25} strokeWidth={1.6} />
                             </Link>
 
@@ -161,7 +161,7 @@ const Header = () => {
                         </div>
                     ) : (
                         <Link to="/admin/login" className="login-btn">
-                            Giriş Yap
+                            Login
                         </Link>
                     )}
                 </div>
@@ -169,7 +169,7 @@ const Header = () => {
 
             <style>{`
                 .desktop-header {
-                    background: #ffffff; /* DÜZ ARKA PLAN */
+                    background: #ffffff; /* SOLID BACKGROUND */
                     border-bottom: 1px solid #eff3f4;
                     position: sticky;
                     top: 0;
@@ -213,7 +213,7 @@ const Header = () => {
                     height: 40px;
                     padding: 0 16px;
                     border-radius: 9999px;
-                    background: #f1f3f4; /* OPak arka plan */
+                    background: #f1f3f4; /* Opaque background */
                 }
 
                 .header-search-input {

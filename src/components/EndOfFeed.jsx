@@ -25,7 +25,7 @@ const EndOfFeed = () => {
                 margin: 0,
                 color: 'var(--text-color)'
             }}>
-                Her şeyi gördün
+                You've seen everything
             </h3>
             <p style={{
                 color: 'var(--gray-500)',
@@ -34,7 +34,7 @@ const EndOfFeed = () => {
                 margin: '0 auto',
                 lineHeight: '1.4'
             }}>
-                Şu anlık tüm yeni gönderileri yakaladın. Daha fazlası için biraz sonra tekrar gel!
+                You've seen everything. Come back later for more!
             </p>
         </div>
     );

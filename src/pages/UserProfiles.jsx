@@ -103,9 +103,9 @@ const UserProfiles = () => {
     if (!profile) {
         return (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#536471' }}>
-                <h3>Profil bulunamadı</h3>
-                <p>Bu kullanıcı mevcut değil veya silinmiş olabilir.</p>
-                <button onClick={() => navigate('/')} style={{ color: '#1d9bf0', marginTop: '1rem', background: 'none', border: 'none', cursor: 'pointer' }}>Anasayfaya dön</button>
+                <h3>Profile not found</h3>
+                <p>This user does not exist or has been deleted.</p>
+                <button onClick={() => navigate('/')} style={{ color: '#1d9bf0', marginTop: '1rem', background: 'none', border: 'none', cursor: 'pointer' }}>Go back to home</button>
             </div>
         );
     }
@@ -154,14 +154,14 @@ const UserProfiles = () => {
                                 }}
                                 className="hover-bg-dark"
                             >
-                                Profili Düzenle
+                                Edit Profile
                             </button>
                         ) : (
                             <button style={{
                                 padding: '0.5rem 1.5rem', background: '#0f1419', color: '#fff',
                                 borderRadius: '9999px', fontWeight: '700', fontSize: '15px', border: 'none', cursor: 'pointer'
                             }}>
-                                Takip Et
+                                Follow
                             </button>
                         )}
                     </div>
@@ -215,8 +215,8 @@ const UserProfiles = () => {
 
             {/* 3. Tabs */}
             <div style={{ display: 'flex', borderBottom: '1px solid #eff3f4', marginTop: '0.5rem' }}>
-                {['Gönderiler', 'Yanıtlar', 'Medya', 'Beğeniler'].map((tab) => {
-                    const tabKey = tab === 'Gönderiler' ? 'posts' : tab.toLowerCase();
+                {['Posts', 'Comments', 'Media', 'Likes'].map((tab) => {
+                    const tabKey = tab === 'Posts' ? 'posts' : tab.toLowerCase();
                     const isActive = activeTab === tabKey;
 
                     return (
@@ -261,15 +261,15 @@ const UserProfiles = () => {
                         )}
                         {activeTab !== 'posts' && (
                             <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
-                                <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>Henüz içerik yok</span>
-                                <span style={{ fontSize: '0.9rem' }}>Bu özellik yakında eklenecek.</span>
+                                <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No content yet</span>
+                                <span style={{ fontSize: '0.9rem' }}>This feature will be added soon.</span>
                             </div>
                         )}
                     </div>
                 ) : (
                     <div style={{ padding: '3rem', textAlign: 'center', color: '#536471' }}>
-                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>Henüz gönderi yok</span>
-                        <span style={{ fontSize: '0.9rem' }}>Paylaşılan gönderiler burada görünecektir.</span>
+                        <span style={{ display: 'block', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>No posts yet</span>
+                        <span style={{ fontSize: '0.9rem' }}>Shared posts will appear here.</span>
                     </div>
                 )}
             </div>

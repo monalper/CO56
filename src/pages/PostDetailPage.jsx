@@ -41,7 +41,7 @@ const PostDetailPage = () => {
     };
 
     const handleDelete = async (deletedId) => {
-        if (!window.confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return;
+        if (!window.confirm('Are you sure you want to delete this post?')) return;
         try {
             const { error } = await supabase.from('posts').delete().eq('id', deletedId);
             if (error) throw error;
@@ -55,7 +55,7 @@ const PostDetailPage = () => {
         // Since we don't have a dedicated edit page, 
         // we might want to navigate to dashboard and trigger edit there, 
         // but for now let's just show an alert or placeholder.
-        alert('Düzenleme özelliği şimdilik Dashboard sayfasından yapılabilir.');
+        alert('Editing functionality is currently available from the Dashboard page.');
         navigate('/admin/dash');
     };
 
@@ -63,7 +63,7 @@ const PostDetailPage = () => {
         return (
             <div className="flex justify-center items-center" style={{ height: '100vh', color: 'var(--gray-500)' }}>
                 <div className="flex-col items-center gap-2">
-                    <p>Yükleniyor...</p>
+                    <p>Loading...</p>
                 </div>
             </div>
         );
@@ -78,11 +78,11 @@ const PostDetailPage = () => {
                     style={{ marginBottom: '20px', color: 'var(--blue)' }}
                 >
                     <ChevronLeft size={20} />
-                    Geri Dön
+                    Go Back
                 </button>
                 <div style={{ textAlign: 'center', marginTop: '40px' }}>
-                    <h2 className="font-bold">Gönderi bulunamadı.</h2>
-                    <p className="text-gray">Bu paylaşım kaldırılmış veya URL hatalı olabilir.</p>
+                    <h2 className="font-bold">Post not found.</h2>
+                    <p className="text-gray">This post may have been removed or the URL may be incorrect.</p>
                 </div>
             </div>
         );
@@ -106,7 +106,7 @@ const PostDetailPage = () => {
                 <button onClick={() => navigate(-1)} className="hover-gray" style={{ borderRadius: '50%', padding: '8px' }}>
                     <ChevronLeft size={20} />
                 </button>
-                <h2 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>Paylaşım</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Post</h2>
             </div>
 
             {/* Post Content */}
@@ -128,7 +128,7 @@ const PostDetailPage = () => {
                     }} />
                     <div className="flex-col" style={{ flex: 1 }}>
                         <textarea
-                            placeholder="Yanıtını paylaş..."
+                            placeholder="Share your reply..."
                             style={{
                                 width: '100%',
                                 border: 'none',
@@ -140,14 +140,14 @@ const PostDetailPage = () => {
                             }}
                         />
                         <div className="flex justify-end">
-                            <button className="btn-primary" style={{ padding: '8px 20px', fontSize: '15px' }}>Yanıtla</button>
+                            <button className="btn-primary" style={{ padding: '8px 20px', fontSize: '15px' }}>Reply</button>
                         </div>
                     </div>
                 </div>
 
                 {/* Replies Placeholder */}
                 <div style={{ padding: '40px 20px', textAlign: 'center', opacity: 0.6 }}>
-                    <p className="text-gray">Henüz yanıt yok.</p>
+                    <p className="text-gray">No replies yet.</p>
                 </div>
             </div>
 

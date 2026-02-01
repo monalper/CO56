@@ -6,8 +6,6 @@ import { LinkifiedText } from './LinkifiedText';
 
 // --- Components ---
 
-
-
 // 2. Who To Follow Widget
 const WhoToFollow = () => {
     const [users, setUsers] = useState([]);
@@ -51,7 +49,7 @@ const WhoToFollow = () => {
 
     return (
         <div className="widget-box">
-            <h3 className="widget-title">Kimi takip etmeli</h3>
+            <h3 className="widget-title">Who to follow</h3>
             <div className="flex-col" style={{ gap: '16px' }}>
                 {users.map((profile) => (
                     <div
@@ -124,7 +122,7 @@ const WhoToFollow = () => {
                                 cursor: 'pointer'
                             }}
                         >
-                            Takip et
+                            Follow
                         </button>
                     </div>
                 ))}
@@ -147,7 +145,7 @@ const WhoToFollow = () => {
                 }}
                 className="hover-bg-light"
             >
-                Daha fazla göster
+                Show more
             </Link>
         </div>
     );
@@ -213,7 +211,7 @@ const ProfileInfoWidget = () => {
         const date = new Date(dateString);
         return isNaN(date.getTime())
             ? ''
-            : date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }) + ' tarihinde katıldı';
+            : 'Joined ' + date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     };
 
     return (
@@ -294,7 +292,7 @@ const ProfileInfoWidget = () => {
                                 cursor: 'pointer'
                             }}
                         >
-                            Profili Düzenle
+                            Edit Profile
                         </button>
                     ) : (
                         <button style={{
@@ -308,7 +306,7 @@ const ProfileInfoWidget = () => {
                             border: 'none',
                             cursor: 'pointer'
                         }}>
-                            Takip Et
+                            Follow
                         </button>
                     )}
                 </div>
@@ -321,13 +319,13 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
     return (
         <nav className="sidebar-footer">
-            <Link to="/terms" className="footer-link">Hizmet Şartları</Link>
-            <Link to="/privacy" className="footer-link">Gizlilik Politikası</Link>
-            <Link to="/cookies" className="footer-link">Çerez Politikası</Link>
-            <Link to="/accessibility" className="footer-link">Erişilebilirlik</Link>
-            <Link to="/ads-info" className="footer-link">Reklam Bilgisi</Link>
+            <Link to="/terms" className="footer-link">Terms of Service</Link>
+            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+            <Link to="/cookies" className="footer-link">Cookie Policy</Link>
+            <Link to="/accessibility" className="footer-link">Accessibility</Link>
+            <Link to="/ads-info" className="footer-link">Ads Info</Link>
             <div className="footer-more">
-                <span className="footer-link">Daha fazla...</span>
+                <span className="footer-link">More...</span>
             </div>
             <span className="footer-copyright">© {currentYear} CO56 Corp.</span>
         </nav>

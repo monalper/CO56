@@ -54,7 +54,7 @@ const SearchPage = () => {
     const [filterProfile, setFilterProfile] = useState(null);
 
     useEffect(() => {
-        document.title = query ? `${query} - Keşfet | CO56` : "Keşfet | CO56";
+        document.title = query ? `${query} - Explore | CO56` : "Explore | CO56";
         if (query) {
             handleSearch();
         } else {
@@ -161,7 +161,7 @@ const SearchPage = () => {
                 borderBottom: '1px solid #eff3f4',
                 textAlign: 'center'
             }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Keşfet</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Explore</h2>
             </div>
 
             {/* Search Header */}
@@ -224,7 +224,7 @@ const SearchPage = () => {
 
                     <input
                         type="text"
-                        placeholder={userFilter ? "Profilde ara" : "Arama yap..."}
+                        placeholder={userFilter ? "Search in profile" : "Search..."}
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         style={{
@@ -242,8 +242,8 @@ const SearchPage = () => {
                 {query && (
                     <div style={{ display: 'flex', marginTop: '4px' }}>
                         {[
-                            { id: 'posts', label: 'Gönderiler' },
-                            { id: 'accounts', label: 'Kişiler' }
+                            { id: 'posts', label: 'Posts' },
+                            { id: 'accounts', label: 'People' }
                         ].map((tab) => {
                             if (userFilter && tab.id === 'accounts') return null;
                             return (
@@ -286,7 +286,7 @@ const SearchPage = () => {
             <div style={{ padding: '0' }}>
                 {loading ? (
                     <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--gray-500)' }}>
-                        Aranıyor...
+                        Searching...
                     </div>
                 ) : query ? (
                     <div>
@@ -298,11 +298,11 @@ const SearchPage = () => {
                                 </>
                             ) : (
                                 <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Sonuç bulunamadı</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>No results found</div>
                                     <div style={{ color: 'var(--gray-500)' }}>
                                         {userFilter
-                                            ? `"${query}" kelimesini bu profilde bulamadık.`
-                                            : `"${query}" kelimesini içeren bir gönderi bulamadık.`
+                                            ? `We couldn't find "${query}" in this profile.`
+                                            : `We couldn't find any posts containing "${query}".`
                                         }
                                     </div>
                                 </div>
@@ -314,15 +314,15 @@ const SearchPage = () => {
                                 </div>
                             ) : (
                                 <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Hesap bulunamadı</div>
-                                    <div style={{ color: 'var(--gray-500)' }}>"{query}" aramasına uygun bir hesap bulamadık.</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>No accounts found</div>
+                                    <div style={{ color: 'var(--gray-500)' }}>We couldn't find any accounts matching "${query}".</div>
                                 </div>
                             )
                         )}
                     </div>
                 ) : (
                     <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--gray-500)' }}>
-                        Aramak istediğiniz kelimeyi veya kullanıcı adını yazın
+                        Type a keyword or username to search
                     </div>
                 )}
             </div>

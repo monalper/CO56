@@ -197,7 +197,7 @@ const NotFoundPage = () => {
                 marginBottom: '12px',
                 letterSpacing: '-0.02em'
             }}>
-                Yeni Sayfalar Yazıyoruz
+                New Pages are Coming
             </h1>
 
             <p style={{
@@ -207,7 +207,7 @@ const NotFoundPage = () => {
                 lineHeight: '1.6',
                 marginBottom: '32px'
             }}>
-                Üzgünüz, aradığınız sayfa mevcut değil veya başka bir adrese taşınmış olabilir.
+                Sorry, the page you are looking for does not exist or has been moved to another address.
             </p>
 
             <Link to="/" className="btn-primary" style={{
@@ -219,7 +219,7 @@ const NotFoundPage = () => {
                 textDecoration: 'none',
                 borderRadius: '9999px'
             }}>
-                Ana Sayfaya Dön
+                Go to Home
             </Link>
 
             <div style={{

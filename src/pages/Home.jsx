@@ -11,7 +11,7 @@ const Home = () => {
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
-        document.title = "Anasayfa | CO56";
+        document.title = "Home | CO56";
         fetchPosts();
         checkSession();
     }, []);
@@ -58,16 +58,16 @@ const Home = () => {
                 borderBottom: '1px solid #eff3f4',
                 textAlign: 'center'
             }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Akış</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>Feed</h2>
             </div>
 
 
             {/* Feed */}
             <div className="feed" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                 {loading ? (
-                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Yükleniyor...</p>
+                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Loading...</p>
                 ) : posts.length === 0 ? (
-                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>Henüz paylaşım yok.</p>
+                    <p className="text-gray" style={{ textAlign: 'center', marginTop: '20px' }}>No posts yet.</p>
                 ) : (
                     <>
                         {posts.map(post => (

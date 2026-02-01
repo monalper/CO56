@@ -57,13 +57,13 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
     const handleReport = (e) => {
         e.stopPropagation();
         setShowMenu(false);
-        alert('Bu gönderi şikayet edildi.');
+        alert('This post has been reported.');
     };
 
     const handleBlock = (e) => {
         e.stopPropagation();
         setShowMenu(false);
-        alert('Bu kullanıcı engellendi.');
+        alert('This user has been blocked.');
     };
 
     const [aspectRatio, setAspectRatio] = useState('3/4');
@@ -223,22 +223,22 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                     <>
                                         <button onClick={internalEdit} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', textAlign: 'left' }}>
                                             <Edit size={18} color="var(--blue)" />
-                                            <span>Düzenle</span>
+                                            <span>Edit</span>
                                         </button>
                                         <button onClick={internalDelete} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', color: '#F4212E', textAlign: 'left' }}>
                                             <Trash2 size={18} />
-                                            <span style={{ fontWeight: '600' }}>Sil</span>
+                                            <span style={{ fontWeight: '600' }}>Delete</span>
                                         </button>
                                     </>
                                 ) : (
                                     <>
                                         <button onClick={handleReport} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', textAlign: 'left' }}>
                                             <Flag size={18} color="var(--gray-500)" />
-                                            <span>Şikayet Et</span>
+                                            <span>Report</span>
                                         </button>
                                         <button onClick={handleBlock} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', color: '#F4212E', textAlign: 'left' }}>
                                             <UserX size={18} />
-                                            <span style={{ fontWeight: '600' }}>Kullanıcıyı Engelle</span>
+                                            <span style={{ fontWeight: '600' }}>Block User</span>
                                         </button>
                                     </>
                                 )}
@@ -278,7 +278,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                     }}
                                     style={{ color: 'var(--blue)', fontSize: '0.9rem', marginTop: '0.25rem', padding: '0' }}
                                 >
-                                    Daha fazla
+                                    See more
                                 </button>
                             )}
                         </div>
@@ -358,7 +358,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                 e.stopPropagation();
                                 navigate(`/@${profiles?.username}/status/${postId}`);
                             }}
-                            title="Yanıtla"
+                            title="Reply"
                             style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
                         >
                             <MessageCircle size={18} />
@@ -366,7 +366,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
 
                         <button
                             onClick={(e) => { e.stopPropagation(); }}
-                            title="Kaydet"
+                            title="Save"
                             style={{ padding: '8px', background: 'transparent', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
                         >
                             <Bookmark size={20} />

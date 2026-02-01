@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, Check } from 'lucide-react';
+import { Camera, X, Check, ChevronDown } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../lib/cropUtils';
 
@@ -17,6 +17,9 @@ const Settings = () => {
     const [bio, setBio] = useState('');
     const [website, setWebsite] = useState('');
     const [location, setLocation] = useState('');
+
+    // UI States
+    const [language, setLanguage] = useState('en'); // Statik dil seçimi
 
     // Image States
     const [avatarUrl, setAvatarUrl] = useState(null);
@@ -34,10 +37,11 @@ const Settings = () => {
     const [tempImageSrc, setTempImageSrc] = useState(null);
     const [cropType, setCropType] = useState('avatar'); // 'avatar' | 'cover'
 
-    const [activeTab, setActiveTab] = useState('Profil');
+    // Tab State
+    const [activeTab, setActiveTab] = useState('Account');
 
     useEffect(() => {
-        document.title = "Ayarlar | CO56";
+        document.title = "Settings | CO56";
         getProfile();
     }, []);
 
@@ -115,7 +119,7 @@ const Settings = () => {
             setTempImageSrc(null);
         } catch (e) {
             console.error(e);
-            alert('Görüntü kırpılırken bir hata oluştu.');
+            alert('An error occurred while cropping the image.');
         }
     }, [croppedAreaPixels, tempImageSrc, cropType]);
 
@@ -143,7 +147,6 @@ const Settings = () => {
             let newAvatarUrl = avatarUrl;
             let newCoverUrl = coverUrl;
 
-            // Avatars bucket usage
             if (avatarFile) {
                 newAvatarUrl = await uploadImage(avatarFile, 'avatars');
             }
@@ -167,18 +170,18 @@ const Settings = () => {
 
             if (error) throw error;
 
-            alert('Profil güncellendi!');
+            alert('Profile updated!');
             navigate(`/@${username}`);
 
         } catch (error) {
-            alert('Hata: ' + error.message);
+            alert('Error: ' + error.message);
         } finally {
             setSaving(false);
         }
     };
 
     if (loading) {
-        return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>Yükleniyor...</div>;
+        return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>Loading...</div>;
     }
 
     return (
@@ -195,18 +198,18 @@ const Settings = () => {
                     <button onClick={() => navigate(username ? `/@${username}` : '/')} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%' }} className="hover-bg">
                         <X size={20} />
                     </button>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>Ayarlar</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>Settings</h2>
                 </div>
                 <button
                     onClick={handleSave}
                     disabled={saving}
                     style={{
                         background: '#0f1419', color: '#fff', padding: '0.5rem 1.25rem',
-                        borderRadius: '9999px', border: 'none', fontWeight: '700',
+                        borderRadius: '9999px', border: 'none', fontWeight: '600',
                         fontSize: '15px', cursor: 'pointer', opacity: saving ? 0.7 : 1
                     }}
                 >
-                    {saving ? 'Kaydediliyor' : 'Kaydet'}
+                    {saving ? 'Saving...' : 'Save'}
                 </button>
             </div>
 
@@ -219,7 +222,7 @@ const Settings = () => {
                 top: '53px',
                 zIndex: 9
             }}>
-                {['Hesap', 'Profil', 'Gizlilik'].map((tab) => (
+                {['Account', 'Profile', 'Privacy'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -227,11 +230,13 @@ const Settings = () => {
                             flex: 1,
                             padding: '1rem 0',
                             fontSize: '15px',
-                            fontWeight: activeTab === tab ? '700' : '500',
+                            fontWeight: activeTab === tab ? '600' : '500',
                             color: activeTab === tab ? '#0f1419' : '#536471',
                             position: 'relative',
                             transition: 'background-color 0.2s',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            background: 'none',
+                            border: 'none'
                         }}
                         className="tab-button"
                     >
@@ -254,27 +259,58 @@ const Settings = () => {
 
             {/* Tab Content */}
             <div style={{ padding: '1.5rem 1rem' }}>
-                {activeTab === 'Hesap' && (
+                {activeTab === 'Account' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div className="section-title">Hesap Bilgileri</div>
+                        <div className="section-title">Account Information</div>
                         <div className="form-group readonly">
-                            <label>E-posta</label>
+                            <label>Email</label>
                             <input type="text" value={user?.email || ''} readOnly />
                         </div>
                         <div className="form-group">
-                            <label>Şifre</label>
+                            <label>Password</label>
                             <input type="password" value="********" readOnly />
-                            <button style={{ color: '#1d9bf0', fontSize: '14px', textAlign: 'left', marginTop: '4px', fontWeight: '500' }}>Şifreyi Değiştir</button>
+                            <button style={{ color: '#1d9bf0', border: 'none', background: 'none', padding: 0, fontSize: '14px', textAlign: 'left', marginTop: '4px', fontWeight: '500', cursor: 'pointer' }}>Change Password</button>
                         </div>
+
+                        {/* Language Selection - NEW SECTION */}
+                        <div className="section-title" style={{ marginTop: '0.5rem' }}>Localization</div>
+                        <div className="form-group">
+                            <label>Display Language</label>
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                <select
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    style={{
+                                        appearance: 'none',
+                                        width: '100%',
+                                        border: 'none',
+                                        outline: 'none',
+                                        background: 'transparent',
+                                        fontSize: '1rem',
+                                        color: '#0f1419',
+                                        padding: '4px 0',
+                                        cursor: 'pointer',
+                                        fontWeight: '400'
+                                    }}
+                                >
+                                    <option value="en">English</option>
+                                    <option value="tr">Türkçe</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                                <ChevronDown size={18} style={{ position: 'absolute', right: 0, pointerEvents: 'none', color: '#536471' }} />
+                            </div>
+                        </div>
+
                         <div style={{ borderTop: '1px solid #eff3f4', paddingTop: '1.5rem', marginTop: '1rem' }}>
-                            <button style={{ color: '#f4212e', fontWeight: '600', padding: '0.5rem 0' }}>Hesabı Dondur</button>
+                            <button style={{ border: 'none', background: 'none', color: '#f4212e', fontWeight: '600', padding: '0.5rem 0', cursor: 'pointer' }}>Deactivate Account</button>
                         </div>
                     </div>
                 )}
 
-                {activeTab === 'Profil' && (
+                {activeTab === 'Profile' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* Visuals inside Profil tab */}
                         <div style={{ position: 'relative', height: '160px', marginBottom: '3rem', background: '#cfd9de', borderRadius: '12px', overflow: 'hidden' }}>
                             {/* Cover */}
                             <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
@@ -312,7 +348,7 @@ const Settings = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>İsim</label>
+                            <label>Name</label>
                             <input
                                 type="text"
                                 value={displayName}
@@ -322,7 +358,7 @@ const Settings = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Kullanıcı Adı</label>
+                            <label>Username</label>
                             <input
                                 type="text"
                                 value={username}
@@ -337,7 +373,7 @@ const Settings = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Biyografi</label>
+                            <label>Bio</label>
                             <div className="relative">
                                 <textarea
                                     value={bio}
@@ -369,7 +405,7 @@ const Settings = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Konum</label>
+                            <label>Location</label>
                             <input
                                 type="text"
                                 value={location}
@@ -379,7 +415,7 @@ const Settings = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>İnternet Sitesi</label>
+                            <label>Website</label>
                             <input
                                 type="url"
                                 value={website}
@@ -390,30 +426,30 @@ const Settings = () => {
                     </div>
                 )}
 
-                {activeTab === 'Gizlilik' && (
+                {activeTab === 'Privacy' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div className="section-title">Gizlilik ve Güvenlik</div>
+                        <div className="section-title">Privacy and Safety</div>
 
                         <div className="privacy-item">
                             <div className="privacy-info">
-                                <div className="privacy-label">Gizli Hesap</div>
-                                <div className="privacy-desc">Sadece onayladığın kişiler senin paylaşımlarını görebilir.</div>
+                                <div className="privacy-label">Private Account</div>
+                                <div className="privacy-desc">Only people you approve can see your posts.</div>
                             </div>
                             <input type="checkbox" className="ios-toggle" />
                         </div>
 
                         <div className="privacy-item">
                             <div className="privacy-info">
-                                <div className="privacy-label">Direkt Mesajlar</div>
-                                <div className="privacy-desc">Herkesten mesaj almana izin ver.</div>
+                                <div className="privacy-label">Direct Messages</div>
+                                <div className="privacy-desc">Allow message requests from everyone.</div>
                             </div>
                             <input type="checkbox" defaultChecked className="ios-toggle" />
                         </div>
 
                         <div className="privacy-item" style={{ borderBottom: 'none' }}>
                             <div className="privacy-info">
-                                <div className="privacy-label">Veri Paylaşımı</div>
-                                <div className="privacy-desc">Deneyimini iyileştirmek için anonim veri toplanmasına izin ver.</div>
+                                <div className="privacy-label">Data Sharing</div>
+                                <div className="privacy-desc">Allow anonymous data collection to improve your experience.</div>
                             </div>
                             <input type="checkbox" defaultChecked className="ios-toggle" />
                         </div>
@@ -429,8 +465,8 @@ const Settings = () => {
                 }}>
                     <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
                         <button onClick={() => setIsCropModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={24} /></button>
-                        <span style={{ fontWeight: 'bold' }}>Medyayı Düzenle</span>
-                        <button onClick={showCroppedImage} style={{ background: 'white', color: 'black', border: 'none', padding: '0.4rem 1.2rem', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer' }}>Uygula</button>
+                        <span style={{ fontWeight: 'bold' }}>Edit Media</span>
+                        <button onClick={showCroppedImage} style={{ background: 'white', color: 'black', border: 'none', padding: '0.4rem 1.2rem', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer' }}>Apply</button>
                     </div>
 
                     <div style={{ position: 'relative', flex: 1, background: '#333' }}>
@@ -471,7 +507,7 @@ const Settings = () => {
             <style>{`
                 .section-title {
                     font-size: 1.1rem;
-                    fontWeight: 800;
+                    font-weight: 700;
                     color: #0f1419;
                     margin-bottom: 0.5rem;
                 }
@@ -497,7 +533,7 @@ const Settings = () => {
                     margin-bottom: 2px;
                     font-weight: 500;
                 }
-                .form-group input, .form-group textarea {
+                .form-group input, .form-group textarea, .form-group select {
                     border: none;
                     outline: none;
                     background: transparent;
@@ -518,7 +554,6 @@ const Settings = () => {
                     background-color: rgba(0,0,0,0.5) !important;
                 }
                 
-                /* Privacy Styles */
                 .privacy-item {
                     display: flex;
                     justify-content: space-between;
@@ -543,7 +578,6 @@ const Settings = () => {
                     line-height: 1.3;
                 }
 
-                /* IOS Toggle Style */
                 .ios-toggle {
                     appearance: none;
                     width: 40px;
@@ -573,7 +607,6 @@ const Settings = () => {
                     transform: translateX(20px);
                 }
 
-                /* Custom Range Slider */
                 .zoom-range {
                     -webkit-appearance: none;
                     height: 4px;

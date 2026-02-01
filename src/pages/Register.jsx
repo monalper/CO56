@@ -16,7 +16,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = "Hesap Oluştur | CO56";
+        document.title = "Register | CO56";
     }, []);
 
     const handleRegister = async (e) => {
@@ -28,16 +28,16 @@ const Register = () => {
         try {
             // 1. Validate inputs
             if (!email || !password || !username || !displayName) {
-                throw new Error('Lütfen tüm alanları doldurun.');
+                throw new Error('Please fill in all fields.');
             }
             if (!termsAccepted) {
-                throw new Error('Lütfen kullanım şartlarını kabul edin.');
+                throw new Error('Please accept the terms and conditions.');
             }
-            if (password.length < 6) throw new Error('Şifre en az 6 karakter olmalıdır.');
-            if (username.length > 15) throw new Error('Kullanıcı adı en fazla 15 karakter olabilir.');
-            if (displayName.length > 20) throw new Error('Görünen isim en fazla 20 karakter olabilir.');
+            if (password.length < 6) throw new Error('Password must be at least 6 characters long.');
+            if (username.length > 15) throw new Error('Username can be at most 15 characters long.');
+            if (displayName.length > 20) throw new Error('Display name can be at most 20 characters long.');
             if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                throw new Error('Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir.');
+                throw new Error('Username can only contain letters, numbers, and underscores.');
             }
 
             // 2. Check username availability
@@ -48,7 +48,7 @@ const Register = () => {
                 .maybeSingle();
 
             if (checkError) throw checkError;
-            if (existingUser) throw new Error('Bu kullanıcı adı zaten alınmış.');
+            if (existingUser) throw new Error('This username is already taken.');
 
             // 3. Sign Up with Metadata
             const { data: { user, session }, error: signUpError } = await supabase.auth.signUp({
@@ -65,15 +65,15 @@ const Register = () => {
             if (signUpError) throw signUpError;
 
             if (user && !session) {
-                setSuccessMessage('Kayıt başarılı! Lütfen e-postanızı kontrol edin ve hesabınızı doğrulayın. Doğruladıktan sonra giriş yapabilirsiniz.');
+                setSuccessMessage('Registration successful! Please check your email and verify your account. After verification, you can log in.');
             } else if (session) {
                 // E-posta onayı kapalıysa veya otomatik onaylandıysa direkt profil oluşturmaya git
                 navigate('/onboarding');
             }
 
         } catch (err) {
-            console.error("Kayıt hatası:", err); // Hata detayını konsola yazdır
-            setError(err.message || "Bir hata oluştu");
+            console.error("Registration error:", err); // Hata detayını konsola yazdır
+            setError(err.message || "An error occurred");
         } finally {
             setLoading(false);
         }
@@ -101,7 +101,7 @@ const Register = () => {
                 </div>
 
                 <h1 style={{ fontSize: '1.8rem', fontWeight: '600', marginBottom: '1.5rem', color: '#0f1419', textAlign: 'center' }}>
-                    Hesap oluştur
+                    Register
                 </h1>
 
                 {error && (
@@ -119,7 +119,7 @@ const Register = () => {
                 <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <input
                         type="email"
-                        placeholder="E-posta"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         style={inputStyle}
@@ -127,7 +127,7 @@ const Register = () => {
 
                     <input
                         type="text"
-                        placeholder="Kullanıcı Adı"
+                        placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         maxLength={15}
@@ -136,7 +136,7 @@ const Register = () => {
 
                     <input
                         type="text"
-                        placeholder="Görünen İsim"
+                        placeholder="Display Name"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         maxLength={20}
@@ -146,7 +146,7 @@ const Register = () => {
                     <div style={{ position: 'relative', width: '100%' }}>
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Şifre"
+                            placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             style={inputStyle}
@@ -188,7 +188,7 @@ const Register = () => {
                             onChange={(e) => setTermsAccepted(e.target.checked)}
                             style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#1d9bf0' }}
                         />
-                        <span>Kullanım şartlarını okudum ve onaylıyorum.</span>
+                        <span>I have read and agree to the terms and conditions.</span>
                     </label>
 
                     <button
@@ -207,12 +207,12 @@ const Register = () => {
                             opacity: loading ? 0.7 : 1
                         }}
                     >
-                        {loading ? 'Kaydolunuyor...' : 'Kaydol'}
+                        {loading ? 'Registering...' : 'Register'}
                     </button>
                 </form>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '14px', color: '#536471' }}>
-                    Zaten bir hesabın var mı? <Link to="/login" style={{ color: '#1d9bf0', textDecoration: 'none', fontWeight: '600' }}>Giriş yap</Link>
+                    Already have an account? <Link to="/login" style={{ color: '#1d9bf0', textDecoration: 'none', fontWeight: '600' }}>Login</Link>
                 </div>
             </div>
         </div>

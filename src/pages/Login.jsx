@@ -12,7 +12,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = "Giriş Yap | CO56";
+        document.title = "Login | CO56";
     }, []);
 
     const handleLogin = async (e) => {
@@ -57,7 +57,7 @@ const Login = () => {
                 </div>
 
                 <h1 style={{ fontSize: '1.8rem', fontWeight: '600', marginBottom: '2rem', color: '#0f1419', textAlign: 'center' }}>
-                    Giriş Yap
+                    Login
                 </h1>
 
                 {error && <div style={{ padding: '12px', background: '#ffebee', color: '#c62828', borderRadius: '12px', marginBottom: '1rem', fontSize: '14px', textAlign: 'center' }}>{error}</div>}
@@ -65,7 +65,7 @@ const Login = () => {
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <input
                         type="email"
-                        placeholder="E-posta"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         style={inputStyle}
@@ -75,7 +75,7 @@ const Login = () => {
                     <div style={{ position: 'relative', width: '100%' }}>
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Şifre"
+                            placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             style={inputStyle}
@@ -118,12 +118,12 @@ const Login = () => {
                             opacity: loading ? 0.7 : 1
                         }}
                     >
-                        {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                        {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '14px', color: '#536471' }}>
-                    Hesabın yok mu? <a href="/register" style={{ color: '#1d9bf0', textDecoration: 'none', fontWeight: '600' }}>Kaydol</a>
+                    Don't have an account? <a href="/register" style={{ color: '#1d9bf0', textDecoration: 'none', fontWeight: '600' }}>Register</a>
                 </div>
             </div>
         </div>

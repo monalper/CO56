@@ -106,7 +106,7 @@ const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
 
         } catch (error) {
             console.error('Error saving post:', error);
-            alert('İşlem hatası: ' + error.message);
+            alert('Error saving post: ' + error.message);
         } finally {
             setUploading(false);
         }
@@ -130,7 +130,7 @@ const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
                     <form onSubmit={handleSubmit}>
                         <textarea
                             className="input-field"
-                            placeholder="Neler oluyor?"
+                            placeholder="What's on your mind?"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             style={{
@@ -148,7 +148,7 @@ const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
                             <div style={{ position: 'relative', marginBottom: '12px' }}>
                                 <input
                                     type="text"
-                                    placeholder="Konum ekle..."
+                                    placeholder="Add location..."
                                     className="input-field"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
@@ -235,7 +235,7 @@ const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
                                         transition: 'background-color 0.2s'
                                     }}
                                     className="hover-bg"
-                                    title="Konum Ekle"
+                                    title="Add Location"
                                 >
                                     <MapPin size={19} />
                                 </button>
@@ -250,7 +250,7 @@ const CreatePost = ({ onPostCreated, profile, editPost = null }) => {
                                     opacity: (uploading || (!content.trim() && files.length === 0)) ? 0.5 : 1
                                 }}
                             >
-                                {uploading ? (editPost ? 'Güncelleniyor...' : 'Paylaşılıyor...') : (editPost ? 'Güncelle' : 'Paylaş')}
+                                {uploading ? (editPost ? 'Updating...' : 'Sharing...') : (editPost ? 'Update' : 'Share')}
                             </button>
                         </div>
                     </form>
