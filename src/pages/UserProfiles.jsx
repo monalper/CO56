@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import { LinkifiedText } from '../components/LinkifiedText';
@@ -113,22 +113,21 @@ const UserProfiles = () => {
 
     return (
         <div style={{ width: '100%', minHeight: '100vh', background: '#fff' }}>
+            {/* 2. Profile Info Area - Hidden on Desktop, shown on Mobile */}
+            <div className="mobile-only" style={{ padding: '0 1rem 1rem 1rem', position: 'relative' }}>
 
-            {/* 1. Cover Image (Sticky Header removed as requested) */}
-            <div style={{ width: '100%', height: '200px', backgroundColor: '#cfd9de', position: 'relative' }}>
-                {profile.cover_url ? (
-                    <img
-                        src={profile.cover_url}
-                        alt="Cover"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1d9bf0, #8a2be2)' }} />
-                )}
-            </div>
-
-            {/* 2. Profile Info Area */}
-            <div style={{ padding: '0 1rem 1rem 1rem', position: 'relative' }}>
+                {/* Mobile Cover Image */}
+                <div style={{ width: '100%', height: '140px', backgroundColor: '#cfd9de', margin: '0 -1rem', width: 'calc(100% + 2rem)' }}>
+                    {profile.cover_url ? (
+                        <img
+                            src={profile.cover_url}
+                            alt="Cover"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1d9bf0, #8a2be2)' }} />
+                    )}
+                </div>
 
                 {/* Avatar + Edit/Follow Button Row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-10%' }}>
@@ -210,8 +209,6 @@ const UserProfiles = () => {
                             <span>{formatDate(profile.created_at)}</span>
                         </div>
                     </div>
-
-                    {/* Follow Stats Removed as requested */}
                 </div>
             </div>
 

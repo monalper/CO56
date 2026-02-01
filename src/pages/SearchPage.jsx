@@ -93,7 +93,7 @@ const SearchPage = () => {
                 .from('posts')
                 .select(`
                     *,
-                    profiles (id, display_name, avatar_url),
+                    profiles (id, display_name, avatar_url, username),
                     post_images (id, image_url)
                 `)
                 .ilike('content', `%${query}%`);

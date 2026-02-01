@@ -47,8 +47,6 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
             try {
                 const { error } = await supabase.from('posts').delete().eq('id', postId);
                 if (error) throw error;
-                // If we are in detail view, go back. Otherwise window reload or handle via state?
-                // For now, let's just reload or alert.
                 if (isDetailView) navigate(-1);
                 else window.location.reload();
             } catch (err) {
@@ -71,7 +69,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
     };
 
     // Dynamic Aspect Ratio State
-    const [aspectRatio, setAspectRatio] = useState('3/4'); // Varsayılan değer
+    const [aspectRatio, setAspectRatio] = useState('3/4');
 
     // Lightbox State
     const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -79,10 +77,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
 
     // Navigation helper
     const goToDetail = (e) => {
-        // Don't navigate if we are already in detail view or if clicking interactive elements
         if (isDetailView) return;
-
-        // Profiles might not have username if not fetched correctly, fallback to user_id or 'user'
         const username = profiles?.username || 'user';
         navigate(`/@${username}/status/${postId}`);
     };
@@ -98,16 +93,13 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Format Date using util
     const dateFormatted = formatDate(created_at);
 
-    // Calculate aspect ratio based on the first image
     useEffect(() => {
         if (post_images && post_images.length > 0) {
             const img = new Image();
             img.src = post_images[0].image_url;
             img.onload = () => {
-                const ratio = img.naturalWidth / img.naturalHeight;
                 setAspectRatio(`${img.naturalWidth} / ${img.naturalHeight}`);
             };
         }
@@ -173,33 +165,27 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                     cursor: isDetailView ? 'default' : 'pointer'
                 }}
             >
-                {/* Header Row: Avatar + Name + Date + Menu */}
                 <div className="flex gap-4 items-center" style={{ marginBottom: '0.5rem' }}>
-                    {/* Avatar */}
                     <div style={{ flexShrink: 0, cursor: 'pointer' }} onClick={(e) => {
                         e.stopPropagation();
                         if (profiles?.username) navigate(`/@${profiles.username}`);
-                        else if (user_id) navigate(`/profile`);
                     }}>
                         <div className="avatar" style={{
-                            backgroundImage: profiles?.avatar_url ? `url(${profiles.avatar_url})` : 'none',
+                            backgroundImage: profiles?.avatar_url ? `url(${profiles.avatar_url})` : `url(https://ui-avatars.com/api/?name=${profiles?.display_name || 'User'}&background=random)`,
                             backgroundSize: 'cover'
                         }} />
                     </div>
 
-                    {/* Name and Date */}
                     <div className="flex-col" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={(e) => {
                         e.stopPropagation();
                         if (profiles?.username) navigate(`/@${profiles.username}`);
-                        else if (user_id) navigate(`/profile`);
                     }}>
-                        <span style={{ fontWeight: '600', lineHeight: '1.2' }}>{profiles?.display_name || 'Alper Ercan'}</span>
+                        <span style={{ fontWeight: '600', lineHeight: '1.2' }}>{profiles?.display_name || 'User'}</span>
                         <span className="text-gray" style={{ fontSize: '0.85rem', lineHeight: '1.2', marginTop: '2px' }}>
                             {dateFormatted}{location && `, ${location}`}
                         </span>
                     </div>
 
-                    {/* Actions Dropdown */}
                     <div style={{ position: 'relative' }} ref={menuRef}>
                         <button
                             onClick={(e) => {
@@ -217,7 +203,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                             }}
                             className="hover-gray"
                         >
-                            <MoreHorizontal size={18} />
+                            < MoreHorizontal size={18} />
                         </button>
 
                         {showMenu && (
@@ -236,76 +222,22 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                             }}>
                                 {isOurPost ? (
                                     <>
-                                        <button
-                                            onClick={internalEdit}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                padding: '12px 16px',
-                                                width: '100%',
-                                                fontSize: '15px',
-                                                textAlign: 'left',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            className="dropdown-item"
-                                        >
+                                        <button onClick={internalEdit} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', textAlign: 'left' }}>
                                             <Edit size={18} color="var(--blue)" />
                                             <span>Düzenle</span>
                                         </button>
-                                        <button
-                                            onClick={internalDelete}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                padding: '12px 16px',
-                                                width: '100%',
-                                                fontSize: '15px',
-                                                color: '#F4212E',
-                                                textAlign: 'left',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            className="dropdown-item"
-                                        >
+                                        <button onClick={internalDelete} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', color: '#F4212E', textAlign: 'left' }}>
                                             <Trash2 size={18} />
                                             <span style={{ fontWeight: '600' }}>Sil</span>
                                         </button>
                                     </>
                                 ) : (
                                     <>
-                                        <button
-                                            onClick={handleReport}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                padding: '12px 16px',
-                                                width: '100%',
-                                                fontSize: '15px',
-                                                textAlign: 'left',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            className="dropdown-item"
-                                        >
+                                        <button onClick={handleReport} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', textAlign: 'left' }}>
                                             <Flag size={18} color="var(--gray-500)" />
                                             <span>Şikayet Et</span>
                                         </button>
-                                        <button
-                                            onClick={handleBlock}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                padding: '12px 16px',
-                                                width: '100%',
-                                                fontSize: '15px',
-                                                color: '#F4212E',
-                                                textAlign: 'left',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            className="dropdown-item"
-                                        >
+                                        <button onClick={handleBlock} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', width: '100%', fontSize: '15px', color: '#F4212E', textAlign: 'left' }}>
                                             <UserX size={18} />
                                             <span style={{ fontWeight: '600' }}>Kullanıcıyı Engelle</span>
                                         </button>
@@ -316,19 +248,12 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                     </div>
                 </div>
 
-                {/* Dropdown Styles */}
                 <style>{`
-                    .hover-gray:hover {
-                        background-color: rgba(15, 20, 25, 0.1);
-                    }
-                    .dropdown-item:hover {
-                        background-color: rgba(0, 0, 0, 0.03);
-                    }
+                    .hover-gray:hover { background-color: rgba(15, 20, 25, 0.1); }
+                    .dropdown-item:hover { background-color: rgba(0, 0, 0, 0.03); }
                 `}</style>
 
-                {/* Content Body */}
                 <div style={{ paddingLeft: '56px' }}>
-                    {/* Text Content */}
                     {content && (
                         <div style={{ marginBottom: '0.75rem' }}>
                             <div
@@ -360,7 +285,6 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                         </div>
                     )}
 
-                    {/* Images - Carousel Style */}
                     {post_images && post_images.length > 0 && (
                         <div style={{ position: 'relative', marginTop: '0.5rem' }}>
                             <div
@@ -375,14 +299,7 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                     msOverflowStyle: 'none'
                                 }}
                             >
-                                <style>
-                                    {`
-                            .image-carousel::-webkit-scrollbar {
-                                display: none;
-                            }
-                        `}
-                                </style>
-
+                                <style>{`.image-carousel::-webkit-scrollbar { display: none; }`}</style>
                                 {post_images.map((img, index) => (
                                     <div
                                         key={img.id}
@@ -390,49 +307,22 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                                             flex: '0 0 100%',
                                             scrollSnapAlign: 'start',
                                             position: 'relative',
-                                            aspectRatio: aspectRatio, // Dinamik oran burada uygulanıyor
+                                            aspectRatio: aspectRatio,
                                             overflow: 'hidden',
                                             borderRadius: '12px',
                                             cursor: 'pointer'
                                         }}
                                         onClick={() => openLightbox(index)}
                                     >
-                                        <img
-                                            src={img.image_url}
-                                            alt="Post attachment"
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover'
-                                            }}
-                                        />
+                                        <img src={img.image_url} alt="Post attachment" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Dots indicator if multiple images */}
                             {post_images.length > 1 && (
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: '15px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    gap: '6px',
-                                    zIndex: 10,
-                                    pointerEvents: 'none'
-                                }}>
+                                <div style={{ position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)', display: 'flex', justifyContent: 'center', gap: '6px', zIndex: 10, pointerEvents: 'none' }}>
                                     {post_images.map((_, i) => (
-                                        <div
-                                            key={i}
-                                            style={{
-                                                width: '6px', height: '6px', borderRadius: '50%',
-                                                backgroundColor: i === currentImageIndex ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                                                boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                        />
+                                        <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: i === currentImageIndex ? 'white' : 'rgba(255, 255, 255, 0.5)', boxShadow: '0 1px 2px rgba(0,0,0,0.3)', transition: 'background-color 0.2s' }} />
                                     ))}
                                 </div>
                             )}
@@ -441,61 +331,17 @@ const PostCard = ({ post, onDelete, onEdit, isDetailView = false }) => {
                 </div>
             </div>
 
-            {/* LIGHTBOX */}
             {lightboxOpen && post_images && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                    backgroundColor: 'black', zIndex: 9999,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }} onClick={closeLightbox}>
-
-                    <button
-                        onClick={closeLightbox}
-                        style={{ position: 'absolute', top: '20px', right: '20px', color: 'white', zIndex: 10000 }}
-                    >
-                        <X size={32} />
-                    </button>
-
-                    {/* Left Button */}
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'black', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={closeLightbox}>
+                    <button onClick={closeLightbox} style={{ position: 'absolute', top: '20px', right: '20px', color: 'white', zIndex: 10000 }}><X size={32} /></button>
                     {post_images.length > 1 && (
-                        <button
-                            onClick={prevImage}
-                            style={{
-                                position: 'absolute', left: '20px', color: 'white',
-                                padding: '10px', borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.1)',
-                                opacity: currentImageIndex === 0 ? 0.3 : 1,
-                                pointerEvents: currentImageIndex === 0 ? 'none' : 'auto'
-                            }}
-                        >
-                            <ChevronLeft size={32} />
-                        </button>
+                        <button onClick={prevImage} style={{ position: 'absolute', left: '20px', color: 'white', padding: '10px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', opacity: currentImageIndex === 0 ? 0.3 : 1, pointerEvents: currentImageIndex === 0 ? 'none' : 'auto' }}><ChevronLeft size={32} /></button>
                     )}
-
-                    {/* Image */}
                     <div style={{ maxWidth: '90%', maxHeight: '90%', pointerEvents: 'none' }}>
-                        <img
-                            src={post_images[currentImageIndex].image_url}
-                            alt="Full view"
-                            style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain' }}
-                            onClick={(e) => e.stopPropagation()}
-                        />
+                        <img src={post_images[currentImageIndex].image_url} alt="Full view" style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain' }} onClick={(e) => e.stopPropagation()} />
                     </div>
-
-                    {/* Right Button */}
                     {post_images.length > 1 && (
-                        <button
-                            onClick={nextImage}
-                            style={{
-                                position: 'absolute', right: '20px', color: 'white',
-                                padding: '10px', borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.1)',
-                                opacity: currentImageIndex === post_images.length - 1 ? 0.3 : 1,
-                                pointerEvents: currentImageIndex === post_images.length - 1 ? 'none' : 'auto'
-                            }}
-                        >
-                            <ChevronRight size={32} />
-                        </button>
+                        <button onClick={nextImage} style={{ position: 'absolute', right: '20px', color: 'white', padding: '10px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', opacity: currentImageIndex === post_images.length - 1 ? 0.3 : 1, pointerEvents: currentImageIndex === post_images.length - 1 ? 'none' : 'auto' }}><ChevronRight size={32} /></button>
                     )}
                 </div>
             )}

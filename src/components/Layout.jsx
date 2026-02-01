@@ -76,13 +76,13 @@ const Layout = () => {
                         fill={isActive('/create') ? 'currentColor' : 'none'}
                     />
                 </Link>
-                <Link to={profile?.username ? `/@${profile.username}` : "/profile"} className={`bottom-nav-item ${location.pathname.startsWith('/@') || isActive('/profile') ? 'active' : ''}`}>
+                <Link to={profile?.username ? `/@${profile.username}` : "#"} className={`bottom-nav-item ${location.pathname.startsWith('/@') ? 'active' : ''}`}>
                     <div style={{
                         width: '28px',
                         height: '28px',
                         borderRadius: '50%',
                         overflow: 'hidden',
-                        border: (location.pathname.startsWith('/@') || isActive('/profile')) ? '2px solid #0f1419' : 'none',
+                        border: location.pathname.startsWith('/@') ? '2px solid #0f1419' : 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

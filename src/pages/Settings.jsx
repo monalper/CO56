@@ -192,7 +192,7 @@ const Settings = () => {
                 zIndex: 10, borderBottom: '1px solid #eff3f4'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button onClick={() => navigate(`/@${username}` || '/profile')} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%' }} className="hover-bg">
+                    <button onClick={() => navigate(username ? `/@${username}` : '/')} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%' }} className="hover-bg">
                         <X size={20} />
                     </button>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>Ayarlar</h2>

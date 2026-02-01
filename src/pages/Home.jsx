@@ -35,7 +35,7 @@ const Home = () => {
                 .from('posts')
                 .select(`
           *,
-          profiles (id, display_name, avatar_url),
+          profiles (id, display_name, avatar_url, username),
           post_images (id, image_url)
         `)
                 .order('created_at', { ascending: false });

@@ -1,126 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Search, X } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
+import { LinkifiedText } from './LinkifiedText';
 
 // --- Components ---
 
-// 1. Search Box
-const SearchBox = () => {
-    const [query, setQuery] = useState('');
-    const { userId: urlUserId } = useParams();
-    const [searchParams] = useSearchParams();
-    const queryUserId = searchParams.get('user');
-    const userId = urlUserId || queryUserId;
 
-    const [profile, setProfile] = useState(null);
-    const [useProfileFilter, setUseProfileFilter] = useState(false);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (userId) {
-            fetchProfile(userId);
-            setUseProfileFilter(true);
-        } else {
-            setProfile(null);
-            setUseProfileFilter(false);
-        }
-    }, [userId]);
-
-    const fetchProfile = async (id) => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('display_name, avatar_url, username')
-                .eq('id', id)
-                .single();
-            if (data) setProfile(data);
-        } catch (err) {
-            console.error("Error fetching profile for search box:", err);
-        }
-    };
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (query.trim()) {
-            let url = `/search?q=${encodeURIComponent(query)}`;
-            if (useProfileFilter && userId) {
-                url += `&user=${userId}`;
-            }
-            navigate(url);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSearch} style={{
-            background: 'rgba(235, 235, 235, 0.45)',
-            borderRadius: '9999px',
-            padding: '6px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: '0',
-            minHeight: '45px'
-        }}>
-            <Search size={18} className="text-gray" style={{ flexShrink: 0 }} />
-
-            {useProfileFilter && profile && (
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: '#0f1419',
-                    color: 'white',
-                    padding: '4px 10px',
-                    borderRadius: '16px',
-                    gap: '6px',
-                    fontSize: '13px',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0
-                }}>
-                    <img
-                        src={profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.display_name}&background=f3f4f6&color=6b7280`}
-                        alt=""
-                        style={{ width: '18px', height: '18px', borderRadius: '50%' }}
-                    />
-                    <span style={{ fontWeight: '600', maxWidth: '80px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {profile.display_name}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() => setUseProfileFilter(false)}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'white',
-                            padding: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            cursor: 'pointer',
-                            marginLeft: '2px'
-                        }}
-                    >
-                        <X size={14} />
-                    </button>
-                </div>
-            )}
-
-            <input
-                type="text"
-                placeholder={useProfileFilter ? "Profilde ara" : "Ara"}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                style={{
-                    background: 'transparent',
-                    border: 'none',
-                    outline: 'none',
-                    width: '100%',
-                    fontSize: '15px',
-                    padding: '8px 0'
-                }}
-            />
-        </form>
-    );
-};
 
 // 2. Who To Follow Widget
 const WhoToFollow = () => {
@@ -267,6 +153,170 @@ const WhoToFollow = () => {
     );
 };
 
+// 3. Profile Info Widget (Sticky on Profile Pages)
+const ProfileInfoWidget = () => {
+    const { username: rawUsername } = useParams();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const navigate = useNavigate();
+
+    const username = rawUsername?.startsWith('@') ? rawUsername.substring(1) : (rawUsername === 'profile' ? null : rawUsername);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setCurrentUser(user);
+        };
+        checkUser();
+    }, []);
+
+    useEffect(() => {
+        if (!username && rawUsername !== 'profile') {
+            setProfile(null);
+            return;
+        }
+        fetchProfile();
+    }, [username, rawUsername]);
+
+    const fetchProfile = async () => {
+        setLoading(true);
+        try {
+            let data, error;
+            if (rawUsername === 'profile') {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const result = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                    data = result.data;
+                    error = result.error;
+                }
+            } else {
+                const result = await supabase.from('profiles').select('*').eq('username', username).single();
+                data = result.data;
+                error = result.error;
+            }
+
+            if (data) setProfile(data);
+        } catch (err) {
+            console.error("Error fetching profile for sidebar:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!profile) return null;
+
+    const isOwnProfile = currentUser && profile && currentUser.id === profile.id;
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return isNaN(date.getTime())
+            ? ''
+            : date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }) + ' tarihinde katıldı';
+    };
+
+    return (
+        <div className="widget-box profile-sidebar-widget" style={{ marginBottom: '16px', background: 'rgba(235, 235, 235, 0.3)', padding: 0, borderRadius: '16px', overflow: 'hidden' }}>
+            {/* Banner / Cover Image */}
+            <div style={{ width: '100%', height: '100px', backgroundColor: '#cfd9de', position: 'relative' }}>
+                {profile?.cover_url ? (
+                    <img
+                        src={profile.cover_url}
+                        alt="Cover"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                ) : (
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(45deg, #1d9bf0, #8a2be2)' }} />
+                )}
+            </div>
+
+            <div style={{ padding: '0 20px 20px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginTop: '-32px', position: 'relative', zIndex: 2 }}>
+                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#eee', flexShrink: 0, border: '4px solid #fff', background: '#fff', position: 'relative' }}>
+                        <img
+                            src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.display_name}&background=f3f4f6&color=6b7280`}
+                            alt="Avatar"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', minWidth: 0, flexWrap: 'wrap' }}>
+                    <h2 style={{ fontSize: '16px', fontWeight: '600', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {profile?.display_name}
+                    </h2>
+                    <span style={{ fontSize: '16px', color: '#536471' }}>
+                        @{profile?.username}
+                    </span>
+                </div>
+
+                {profile?.bio && (
+                    <div style={{ fontSize: '15px', color: '#0f1419', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
+                        <LinkifiedText text={profile.bio} />
+                    </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', color: '#536471' }}>
+                    {profile?.location && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <MapPin size={18} />
+                            <span>{profile.location}</span>
+                        </div>
+                    )}
+                    {profile?.website && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <LinkIcon size={18} />
+                            <a href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1d9bf0', textDecoration: 'none' }}>
+                                {profile.website.replace(/^https?:\/\//, '')}
+                            </a>
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Calendar size={18} />
+                        <span>{formatDate(profile?.created_at)}</span>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '8px' }}>
+                    {isOwnProfile ? (
+                        <button
+                            onClick={() => navigate('/settings')}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #cfd9de',
+                                borderRadius: '9999px',
+                                fontWeight: '700',
+                                fontSize: '15px',
+                                background: '#fff',
+                                color: '#0f1419',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Profili Düzenle
+                        </button>
+                    ) : (
+                        <button style={{
+                            width: '100%',
+                            padding: '10px',
+                            background: '#0f1419',
+                            color: '#fff',
+                            borderRadius: '9999px',
+                            fontWeight: '700',
+                            fontSize: '15px',
+                            border: 'none',
+                            cursor: 'pointer'
+                        }}>
+                            Takip Et
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Footer = () => {
     const currentYear = new Date().getFullYear();
     return (
@@ -286,6 +336,9 @@ const Footer = () => {
 
 // --- Main Sidebar Component ---
 const RightSidebar = () => {
+    const { username } = useParams();
+    const isProfilePage = username || window.location.pathname === '/profile' || window.location.pathname.startsWith('/@');
+
     return (
         <div style={{
             width: '350px',
@@ -298,7 +351,7 @@ const RightSidebar = () => {
             top: '66px',
             height: 'fit-content'
         }}>
-            <SearchBox />
+            {isProfilePage && <ProfileInfoWidget />}
             <WhoToFollow />
             <Footer />
 
